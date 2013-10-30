@@ -1,0 +1,26 @@
+{
+  "name": "derby-templates",
+  "version": "0.0.1",
+  "description": "templats for derby",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive test --timeout 5000 --bail --colors --reporter spec --debug"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/codeparty/derby-templates.git"
+  },
+  "keywords": [
+    "templates",
+    "derby"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/codeparty/derby-templates/issues"
+  },
+  "dependencies": {
+    "saddle": "0.0.2",
+    "html-util": "~0.1.5"
+  }
+}
