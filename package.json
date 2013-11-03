@@ -22,5 +22,8 @@
   "dependencies": {
     "saddle": "0.0.2",
     "html-util": "~0.1.5"
+  },
+  "devDependencies": {
+    "expect.js": "~0.2.0"
   }
 }
