@@ -1,7 +1,7 @@
 var expect = require('expect.js');
 var contexts = require('derby-expressions').contexts;
 var Views = require('derby').templates.Views;
-var derbyTemplates = require('../index');
+var parser = require('../index');
 
 var model = {
   data: {
@@ -42,14 +42,14 @@ describe('Parse and render literal HTML', function() {
   }
   function test(name, source) {
     it(name, function() {
-      var template = derbyTemplates.createTemplate(source);
+      var template = parser.createTemplate(source);
       expect(template.get()).equal(source);
     });
   }
 
   it('throws on a mismatched closing HTML tag', function() {
     expect(function() {
-      derbyTemplates.createTemplate('<div><a></div>');
+      parser.createTemplate('<div><a></div>');
     }).to.throwException();
   });
 
@@ -58,7 +58,7 @@ describe('Parse and render literal HTML', function() {
 describe('Parse and render dynamic text and blocks', function() {
 
   function test(source, expected) {
-    var template = derbyTemplates.createTemplate(source);
+    var template = parser.createTemplate(source);
     expect(template.get(context)).equal(expected);
   }
 
