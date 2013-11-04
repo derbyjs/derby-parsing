@@ -1,24 +1,26 @@
 var expect = require('expect.js');
-var expressions = require('derby-expressions');
-var parsing = require('../lib/parsing');
-var Views = require('../lib/Views');
+var contexts = require('derby-expressions').contexts;
+var Views = require('derby').templates.Views;
+var derbyTemplates = require('../index');
 
-var data = {
-  _page: {
-    greeting: 'Howdy!'
-  , zero: 0
-  , yep: true
-  , nope: false
-  , nada: null
-  , letters: ['A', 'B', 'C']
-  , emptyList: []
-  , matrix: [[0, 1], [1, 0]]
-  , view: 'section'
+var model = {
+  data: {
+    _page: {
+      greeting: 'Howdy!'
+    , zero: 0
+    , yep: true
+    , nope: false
+    , nada: null
+    , letters: ['A', 'B', 'C']
+    , emptyList: []
+    , matrix: [[0, 1], [1, 0]]
+    , view: 'section'
+    }
   }
 };
-var objectModel = new expressions.ObjectModel(data);
-var contextMeta = new expressions.ContextMeta({});
-var context = new expressions.Context(contextMeta, objectModel);
+var contextMeta = new contexts.ContextMeta({});
+var controller = {model: model};
+var context = new contexts.Context(contextMeta, controller);
 
 describe('Parse and render literal HTML', function() {
 
@@ -40,14 +42,14 @@ describe('Parse and render literal HTML', function() {
   }
   function test(name, source) {
     it(name, function() {
-      var template = parsing.createTemplate(source);
+      var template = derbyTemplates.createTemplate(source);
       expect(template.get()).equal(source);
     });
   }
 
   it('throws on a mismatched closing HTML tag', function() {
     expect(function() {
-      parsing.createTemplate('<div><a></div>');
+      derbyTemplates.createTemplate('<div><a></div>');
     }).to.throwException();
   });
 
@@ -56,7 +58,7 @@ describe('Parse and render literal HTML', function() {
 describe('Parse and render dynamic text and blocks', function() {
 
   function test(source, expected) {
-    var template = parsing.createTemplate(source);
+    var template = derbyTemplates.createTemplate(source);
     expect(template.get(context)).equal(expected);
   }
 
@@ -151,7 +153,7 @@ describe('View insertion', function() {
   it('can register and find a view', function() {
     var views = new Views();
     context.meta.views = views;
-    views.register('app:body', '<div></div>');
+    views.register('body', '<div></div>');
     var view = views.find('body');
     expect(view.get(context)).equal('<div></div>');
   });
@@ -161,8 +163,8 @@ describe('View insertion', function() {
       it(source, function() {
         var views = new Views();
         context.meta.views = views;
-        views.register('app:body', source);
-        views.register('app:section', '<div></div>');
+        views.register('body', source);
+        views.register('section', '<div></div>');
         var view = views.find('body');
         expect(view.get(context)).equal('<div></div>');
       });
@@ -176,8 +178,8 @@ describe('View insertion', function() {
       it(source, function() {
         var views = new Views();
         context.meta.views = views;
-        views.register('app:body', source);
-        views.register('app:section', '<div></div>');
+        views.register('body', source);
+        views.register('section', '<div></div>');
         var view = views.find('body');
         expect(view.get(context)).equal('<div></div>');
       });
@@ -191,8 +193,8 @@ describe('View insertion', function() {
       it(source, function() {
         var views = new Views();
         context.meta.views = views;
-        views.register('app:body', source);
-        views.register('app:section', '<div>{{@text}}</div>');
+        views.register('body', source);
+        views.register('section', '<div>{{@text}}</div>');
         var view = views.find('body');
         expect(view.get(context)).equal('<div>Hi</div>');
       });
@@ -206,8 +208,8 @@ describe('View insertion', function() {
       it(source, function() {
         var views = new Views();
         context.meta.views = views;
-        views.register('app:body', source);
-        views.register('app:section', '<div>{{@messageText}}</div>');
+        views.register('body', source);
+        views.register('section', '<div>{{@messageText}}</div>');
         var view = views.find('body');
         expect(view.get(context)).equal('<div>Hi</div>');
       });
@@ -221,8 +223,8 @@ describe('View insertion', function() {
       it(source, function() {
         var views = new Views();
         context.meta.views = views;
-        views.register('app:body', source);
-        views.register('app:section', '<div>{{@text}}</div>');
+        views.register('body', source);
+        views.register('section', '<div>{{@text}}</div>');
         var view = views.find('body');
         expect(view.get(context)).equal('<div>Howdy!</div>');
       });
@@ -234,8 +236,8 @@ describe('View insertion', function() {
   it('passes HTML inside <view> as {{@content}}', function() {
     var views = new Views();
     context.meta.views = views;
-    views.register('app:body', '<view name="section"><b>Hi</b></view>');
-    views.register('app:section', '<div>{{@content}}</div>');
+    views.register('body', '<view name="section"><b>Hi</b></view>');
+    views.register('section', '<div>{{@content}}</div>');
     var view = views.find('body');
     expect(view.get(context)).equal('<div><b>Hi</b></div>');
   });
@@ -243,8 +245,8 @@ describe('View insertion', function() {
   it('content can be overridden', function() {
     var views = new Views();
     context.meta.views = views;
-    views.register('app:body', '<view name="section" content="Stuff"><b>Hi</b></view>');
-    views.register('app:section', '<div>{{@content}}</div>');
+    views.register('body', '<view name="section" content="Stuff"><b>Hi</b></view>');
+    views.register('section', '<div>{{@content}}</div>');
     var view = views.find('body');
     expect(view.get(context)).equal('<div>Stuff</div>');
   });
@@ -252,9 +254,9 @@ describe('View insertion', function() {
   it('parent content can be passed through', function() {
     var views = new Views();
     context.meta.views = views;
-    views.register('app:body', '<view name="section"><b>Hi</b></view>');
-    views.register('app:section', '<div><view name="paragraph" content="{{@content}}"></view></div>');
-    views.register('app:paragraph', '<p>{{@content}}</p>');
+    views.register('body', '<view name="section"><b>Hi</b></view>');
+    views.register('section', '<div><view name="paragraph" content="{{@content}}"></view></div>');
+    views.register('paragraph', '<p>{{@content}}</p>');
     var view = views.find('body');
     expect(view.get(context)).equal('<div><p><b>Hi</b></p></div>');
   });
@@ -262,8 +264,8 @@ describe('View insertion', function() {
   it('views can define custom child attribute tags', function() {
     var views = new Views();
     context.meta.views = views;
-    views.register('app:body', '<view name="section"><title><b>Hi</b></title>More text</view>');
-    views.register('app:section', '<h3>{{@title}}</h3><div>{{@content}}</div>', {attributes: 'title'});
+    views.register('body', '<view name="section"><title><b>Hi</b></title>More text</view>');
+    views.register('section', '<h3>{{@title}}</h3><div>{{@content}}</div>', {attributes: 'title'});
     var view = views.find('body');
     expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
   });
@@ -271,13 +273,13 @@ describe('View insertion', function() {
   it('views can define custom child attribute tags', function() {
     var views = new Views();
     context.meta.views = views;
-    views.register('app:body'
+    views.register('body'
     , '<view name="section">' +
         '<title><b>Hi</b></title>' +
         'More text' +
       '</view>'
     );
-    views.register('app:section'
+    views.register('section'
     , '<h3>{{@title}}</h3>' +
       '<div>{{@content}}</div>'
     , {attributes: 'title'}
@@ -289,13 +291,13 @@ describe('View insertion', function() {
   it('views support generic attribute tags', function() {
     var views = new Views();
     context.meta.views = views;
-    views.register('app:body'
+    views.register('body'
     , '<view name="section">' +
         '<attribute name="title"><b>Hi</b></attribute>' +
         'More text' +
       '</view>'
     );
-    views.register('app:section'
+    views.register('section'
     , '<h3>{{@title}}</h3>' +
       '<div>{{@content}}</div>'
     );
@@ -306,13 +308,13 @@ describe('View insertion', function() {
   it('views can define custom child array tags', function() {
     var views = new Views();
     context.meta.views = views;
-    views.register('app:body'
+    views.register('body'
     , '<view name="tabs">' +
         '<pane title="One"><b>Hi</b></pane>' +
         '<pane title="Two">Ho</pane>' +
       '</view>'
     );
-    views.register('app:tabs'
+    views.register('tabs'
     , '<ul>' +
         '{{each @pane}}' +
           '<li>{{this.title}}</li>' +
@@ -337,13 +339,13 @@ describe('View insertion', function() {
   it('views support generic array tags', function() {
     var views = new Views();
     context.meta.views = views;
-    views.register('app:body'
+    views.register('body'
     , '<view name="tabs">' +
         '<array name="pane" title="One"><b>Hi</b></array>' +
         '<array name="pane" title="Two">Ho</array>' +
       '</view>'
     );
-    views.register('app:tabs'
+    views.register('tabs'
     , '<ul>' +
         '{{each @pane}}' +
           '<li>{{this.title}}</li>' +
@@ -367,14 +369,14 @@ describe('View insertion', function() {
   it('views inside an each pass through alias context', function() {
     var views = new Views();
     context.meta.views = views;
-    views.register('app:body'
+    views.register('body'
     , '<ol>' +
         '{{each _page.matrix as #row}}' +
           '<view name="row"></view>' +
         '{{/each}}' +
       '</ol>'
     );
-    views.register('app:row'
+    views.register('row'
     , '<li>' +
         '<ol>' +
           '{{each #row as #item}}' +

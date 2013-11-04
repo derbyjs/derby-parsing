@@ -1,4 +1,3 @@
-var saddle = require('saddle');
 var htmlUtil = require('html-util');
 var templates = require('derby').templates;
 var expressions = require('derby-expressions').expressions;
@@ -43,24 +42,24 @@ function createTemplate(source, view) {
   , comment: parseHtmlComment
   , other: parseHtmlOther
   });
-  return new saddle.Template(parseNode.content);
+  return new templates.Template(parseNode.content);
 }
 
 function createStringTemplate(source, view) {
   parseNode = new ParseNode(view);
   parseText(source, parseTextLiteral, parseTextExpression);
-  return new saddle.Template(parseNode.content);
+  return new templates.Template(parseNode.content);
 }
 
 function parseHtmlStart(tag, tagName, attributes) {
   var attributesMap = parseAttributes(attributes);
   var element;
-  if (saddle.VOID_ELEMENTS[tagName]) {
-    element = new saddle.Element(tagName, attributesMap);
+  if (templates.VOID_ELEMENTS[tagName]) {
+    element = new templates.Element(tagName, attributesMap);
     parseNode.content.push(element);
   } else {
     parseNode = parseNode.child();
-    element = new saddle.Element(tagName, attributesMap, parseNode.content);
+    element = new templates.Element(tagName, attributesMap, parseNode.content);
     parseNode.parent.content.push(element);
   }
 }
@@ -68,11 +67,11 @@ function parseHtmlStart(tag, tagName, attributes) {
 function parseAttributes(attributes) {
   var attributesMap;
   for (var key in attributes) {
-    if (!attributesMap) attributesMap = new saddle.AttributesMap();
+    if (!attributesMap) attributesMap = new templates.AttributesMap();
 
     var value = attributes[key];
     if (value === '' || typeof value !== 'string') {
-      attributesMap[key] = new saddle.Attribute(value);
+      attributesMap[key] = new templates.Attribute(value);
       continue;
     }
 
@@ -81,13 +80,13 @@ function parseAttributes(attributes) {
 
     if (parseNode.content.length === 1) {
       var item = parseNode.content[0];
-      attributesMap[key] = (item instanceof saddle.Text) ? new saddle.Attribute(item.data) :
-        (item.expression instanceof expressions.LiteralExpression) ? new saddle.Attribute(item.expression.value) :
-        new saddle.DynamicAttribute(item.expression);
+      attributesMap[key] = (item instanceof templates.Text) ? new templates.Attribute(item.data) :
+        (item.expression instanceof expressions.LiteralExpression) ? new templates.Attribute(item.expression.value) :
+        new templates.DynamicAttribute(item.expression);
 
     } else if (parseNode.content.length > 1) {
-      var template = new saddle.Template(parseNode.content);
-      attributesMap[key] = new saddle.DynamicAttribute(template);
+      var template = new templates.Template(parseNode.content);
+      attributesMap[key] = new templates.DynamicAttribute(template);
 
     } else {
       throw new Error('Error parsing ' + key + ' attribute: ' + value);
@@ -101,7 +100,7 @@ function parseAttributes(attributes) {
 function parseHtmlEnd(tag, tagName) {
   parseNode = parseNode.parent;
   var last = parseNode.last();
-  if (!(last instanceof saddle.Element && last.tag === tagName)) {
+  if (!(last instanceof templates.Element && last.tag === tagName)) {
     throw new Error('Mismatched closing HTML tag: ' + tag);
   }
   if (tagName === 'view') {
@@ -124,7 +123,7 @@ function parseHtmlText(data) {
 function parseHtmlComment(tag, data) {
   // Only output comments that start with `<!--[` and end with `]-->`
   if (!htmlUtil.isConditionalComment(tag)) return;
-  var comment = new saddle.Comment(data);
+  var comment = new templates.Comment(data);
   parseNode.content.push(comment);
 }
 
@@ -135,7 +134,7 @@ function parseHtmlOther(tag) {
 }
 
 function parseTextLiteral(data) {
-  var text = new saddle.Text(data);
+  var text = new templates.Text(data);
   parseNode.content.push(text);
 }
 
@@ -172,10 +171,10 @@ function parseBlockExpression(expression) {
     var last = parseNode.last();
     parseNode = parseNode.child();
 
-    if (last instanceof saddle.ConditionalBlock) {
+    if (last instanceof templates.ConditionalBlock) {
       last.expressions.push(expression);
       last.contents.push(parseNode.content);
-    } else if (last instanceof saddle.EachBlock) {
+    } else if (last instanceof templates.EachBlock) {
       if (blockType !== 'else') unexpected(expression.meta.source);
       last.elseContent = parseNode.content;
     } else {
@@ -187,11 +186,11 @@ function parseBlockExpression(expression) {
     var nextNode = parseNode.child();
     var block;
     if (blockType === 'if' || blockType === 'unless') {
-      block = new saddle.ConditionalBlock([expression], [nextNode.content]);
+      block = new templates.ConditionalBlock([expression], [nextNode.content]);
     } else if (blockType === 'each') {
-      block = new saddle.EachBlock(expression, nextNode.content);
+      block = new templates.EachBlock(expression, nextNode.content);
     } else {
-      block = new saddle.Block(expression, nextNode.content);
+      block = new templates.Block(expression, nextNode.content);
     }
     parseNode.content.push(block);
     parseNode = nextNode;
@@ -233,7 +232,7 @@ function parseNamedViewElement(element, view, name) {
 function finishParseViewElement(viewAttributes, remaining, viewPointer) {
   if (!viewAttributes.hasOwnProperty('content') && remaining.length) {
     viewAttributes.content = new templates.ParentWrapper(
-      new saddle.Template(remaining)
+      new templates.Template(remaining)
     );
   }
   parseNode.content.push(viewPointer);
@@ -245,10 +244,10 @@ function viewAttributesFromElement(element) {
     var attribute = element.attributes[key];
     var camelCased = dashToCamelCase(key);
     viewAttributes[camelCased] =
-      (attribute.template instanceof saddle.Template) ?
+      (attribute.template instanceof templates.Template) ?
         new templates.ParentWrapper(attribute.template) :
       (attribute.template instanceof expressions.Expression) ?
-        new templates.ParentWrapper(new saddle.DynamicText(attribute.template), attribute.template) :
+        new templates.ParentWrapper(new templates.DynamicText(attribute.template), attribute.template) :
       attribute.data;
   }
   return viewAttributes;
@@ -264,7 +263,7 @@ function parseContentAttributes(content, view, viewAttributes) {
   var remaining = [];
   for (var i = 0, len = content.length; i < len; i++) {
     var item = content[i];
-    var name = (item instanceof saddle.Element) && item.tag;
+    var name = (item instanceof templates.Element) && item.tag;
 
     if (name === 'attribute') {
       var name = parseNameAttribute(item);
@@ -299,7 +298,7 @@ function parseNameAttribute(element) {
 
 function parseAttributeElement(element, name, viewAttributes) {
   viewAttributes[name] = new templates.ParentWrapper(
-    new saddle.Template(element.content)
+    new templates.Template(element.content)
   );
 }
 
@@ -307,7 +306,7 @@ function parseArrayElement(element, name, viewAttributes) {
   var item = viewAttributesFromElement(element);
   if (!item.hasOwnProperty('content') && element.content.length) {
     item.content = new templates.ParentWrapper(
-      new saddle.Template(element.content)
+      new templates.Template(element.content)
     );
   }
   var viewAttribute = viewAttributes[name] || (viewAttributes[name] = []);
@@ -362,7 +361,7 @@ function attributesFromExpression(expression) {
       var valueExpression = expression.args[i + 1];
       viewAttributes[key] = (valueExpression instanceof expressions.LiteralExpression) ?
         valueExpression.value :
-        new templates.ParentWrapper(new saddle.DynamicText(valueExpression));
+        new templates.ParentWrapper(new templates.DynamicText(valueExpression));
     }
     return viewAttributes;
 
@@ -372,7 +371,7 @@ function attributesFromExpression(expression) {
 }
 
 function parseValueExpression(expression) {
-  var text = new saddle.DynamicText(expression);
+  var text = new templates.DynamicText(expression);
   parseNode.content.push(text);
 }
 
