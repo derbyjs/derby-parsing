@@ -1,6 +1,6 @@
 Work in progress...
 
-derby-templates
+derby-html-parser
 ===============
 
-HTML-based templating for Derby
+Add HTML-based template parsing to Derby
