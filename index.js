@@ -1,7 +1,7 @@
 var htmlUtil = require('html-util');
-var templates = require('derby').templates;
+var templates = require('derby-templates');
 var expressions = require('derby-expressions').expressions;
-var createPathExpression = require('derby-expressions/lib/createPathExpression');
+var createPathExpression = require('derby-expressions/create');
 
 exports.createTemplate = createTemplate;
 exports.createStringTemplate = createStringTemplate;

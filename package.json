@@ -19,7 +19,7 @@
     "url": "https://github.com/codeparty/derby-html-parser/issues"
   },
   "dependencies": {
-    "derby": "*",
+    "derby-templates": "~0.0.1",
     "derby-expressions": "~0.0.1",
     "html-util": "~0.1.5"
   },

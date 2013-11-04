@@ -1,6 +1,6 @@
 var expect = require('expect.js');
 var contexts = require('derby-expressions').contexts;
-var Views = require('derby').templates.Views;
+var templates = require('derby-templates');
 var parser = require('../index');
 
 var model = {
@@ -151,7 +151,7 @@ describe('Parse and render dynamic text and blocks', function() {
 describe('View insertion', function() {
 
   it('can register and find a view', function() {
-    var views = new Views();
+    var views = new templates.Views();
     context.meta.views = views;
     views.register('body', '<div></div>');
     var view = views.find('body');
@@ -161,7 +161,7 @@ describe('View insertion', function() {
   describe('inserts a literal view', function() {
     function test(source) {
       it(source, function() {
-        var views = new Views();
+        var views = new templates.Views();
         context.meta.views = views;
         views.register('body', source);
         views.register('section', '<div></div>');
@@ -176,7 +176,7 @@ describe('View insertion', function() {
   describe('inserts a dynamic view', function() {
     function test(source) {
       it(source, function() {
-        var views = new Views();
+        var views = new templates.Views();
         context.meta.views = views;
         views.register('body', source);
         views.register('section', '<div></div>');
@@ -191,7 +191,7 @@ describe('View insertion', function() {
   describe('inserts a view with literal arguments', function() {
     function test(source) {
       it(source, function() {
-        var views = new Views();
+        var views = new templates.Views();
         context.meta.views = views;
         views.register('body', source);
         views.register('section', '<div>{{@text}}</div>');
@@ -206,7 +206,7 @@ describe('View insertion', function() {
   describe('dashed html view arguments become camel cased', function() {
     function test(source) {
       it(source, function() {
-        var views = new Views();
+        var views = new templates.Views();
         context.meta.views = views;
         views.register('body', source);
         views.register('section', '<div>{{@messageText}}</div>');
@@ -221,7 +221,7 @@ describe('View insertion', function() {
   describe('inserts a view with dynamic arguments', function() {
     function test(source) {
       it(source, function() {
-        var views = new Views();
+        var views = new templates.Views();
         context.meta.views = views;
         views.register('body', source);
         views.register('section', '<div>{{@text}}</div>');
@@ -234,7 +234,7 @@ describe('View insertion', function() {
   });
 
   it('passes HTML inside <view> as {{@content}}', function() {
-    var views = new Views();
+    var views = new templates.Views();
     context.meta.views = views;
     views.register('body', '<view name="section"><b>Hi</b></view>');
     views.register('section', '<div>{{@content}}</div>');
@@ -243,7 +243,7 @@ describe('View insertion', function() {
   });
 
   it('content can be overridden', function() {
-    var views = new Views();
+    var views = new templates.Views();
     context.meta.views = views;
     views.register('body', '<view name="section" content="Stuff"><b>Hi</b></view>');
     views.register('section', '<div>{{@content}}</div>');
@@ -252,7 +252,7 @@ describe('View insertion', function() {
   });
 
   it('parent content can be passed through', function() {
-    var views = new Views();
+    var views = new templates.Views();
     context.meta.views = views;
     views.register('body', '<view name="section"><b>Hi</b></view>');
     views.register('section', '<div><view name="paragraph" content="{{@content}}"></view></div>');
@@ -262,7 +262,7 @@ describe('View insertion', function() {
   });
 
   it('views can define custom child attribute tags', function() {
-    var views = new Views();
+    var views = new templates.Views();
     context.meta.views = views;
     views.register('body', '<view name="section"><title><b>Hi</b></title>More text</view>');
     views.register('section', '<h3>{{@title}}</h3><div>{{@content}}</div>', {attributes: 'title'});
@@ -271,7 +271,7 @@ describe('View insertion', function() {
   });
 
   it('views can define custom child attribute tags', function() {
-    var views = new Views();
+    var views = new templates.Views();
     context.meta.views = views;
     views.register('body'
     , '<view name="section">' +
@@ -289,7 +289,7 @@ describe('View insertion', function() {
   });
 
   it('views support generic attribute tags', function() {
-    var views = new Views();
+    var views = new templates.Views();
     context.meta.views = views;
     views.register('body'
     , '<view name="section">' +
@@ -306,7 +306,7 @@ describe('View insertion', function() {
   });
 
   it('views can define custom child array tags', function() {
-    var views = new Views();
+    var views = new templates.Views();
     context.meta.views = views;
     views.register('body'
     , '<view name="tabs">' +
@@ -337,7 +337,7 @@ describe('View insertion', function() {
   });
 
   it('views support generic array tags', function() {
-    var views = new Views();
+    var views = new templates.Views();
     context.meta.views = views;
     views.register('body'
     , '<view name="tabs">' +
@@ -367,7 +367,7 @@ describe('View insertion', function() {
   });
 
   it('views inside an each pass through alias context', function() {
-    var views = new Views();
+    var views = new templates.Views();
     context.meta.views = views;
     views.register('body'
     , '<ol>' +
