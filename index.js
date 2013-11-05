@@ -53,7 +53,7 @@ function createStringTemplate(source, view) {
 
 function parseHtmlStart(tag, tagName, attributes) {
   var attributesMap = parseAttributes(attributes);
-  var hooks = hooksFromAttributes(attributesMap);
+  var hooks = hooksFromAttributes(attributesMap, 'Element');
   var element;
   if (templates.VOID_ELEMENTS[tagName]) {
     element = new templates.Element(tagName, attributesMap, null, hooks);
@@ -207,7 +207,7 @@ function parseViewElement(element) {
 
   if (nameAttribute.template) {
     var viewAttributes = viewAttributesFromElement(element);
-    var hooks = hooksFromAttributes(viewAttributes);
+    var hooks = hooksFromAttributes(viewAttributes, 'Component');
     var remaining = element.content;
     var viewPointer = new templates.DynamicViewPointer(nameAttribute.template, viewAttributes, hooks);
     finishParseViewElement(viewAttributes, remaining, viewPointer);
@@ -226,7 +226,7 @@ function findView(name) {
 
 function parseNamedViewElement(element, view, name) {
   var viewAttributes = viewAttributesFromElement(element);
-  var hooks = hooksFromAttributes(viewAttributes);
+  var hooks = hooksFromAttributes(viewAttributes, 'Component');
   var remaining = parseContentAttributes(element.content, view, viewAttributes);
   var viewPointer = new templates.ViewPointer(view.name, viewAttributes, hooks, view);
   finishParseViewElement(viewAttributes, remaining, viewPointer);
@@ -256,7 +256,7 @@ function viewAttributesFromElement(element) {
   return viewAttributes;
 }
 
-function hooksFromAttributes(attributes) {
+function hooksFromAttributes(attributes, type) {
   if (!attributes) return;
   var hooks = [];
 
@@ -268,10 +268,11 @@ function hooksFromAttributes(attributes) {
 
   if (attributes.on) {
     var expression = createPathExpression('{' + attributes.on.data + '}');
-    console.log(expression)
-    // for (var key in attributes) {
-    //   hooks.push(new templates.ComponentOn(name, expression));
-    // }
+    var events = objectFromObjectExpression(expression);
+    var constructor = templates[type + 'On'];
+    for (var name in events) {
+      hooks.push(new constructor(name, events[name]));
+    }
     delete attributes.on;
   }
 
@@ -350,7 +351,7 @@ function parseViewExpression(expression) {
   }
 
   var viewAttributes = attributesFromExpression(attributesExpression);
-  var hooks = hooksFromAttributes(viewAttributes);
+  var hooks = hooksFromAttributes(viewAttributes, 'Component');
 
   // A ViewPointer has a static name, and a DynamicViewPointer gets its name
   // at render time
