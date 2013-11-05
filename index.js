@@ -53,13 +53,14 @@ function createStringTemplate(source, view) {
 
 function parseHtmlStart(tag, tagName, attributes) {
   var attributesMap = parseAttributes(attributes);
+  var hooks = hooksFromAttributes(attributesMap);
   var element;
   if (templates.VOID_ELEMENTS[tagName]) {
-    element = new templates.Element(tagName, attributesMap);
+    element = new templates.Element(tagName, attributesMap, null, hooks);
     parseNode.content.push(element);
   } else {
     parseNode = parseNode.child();
-    element = new templates.Element(tagName, attributesMap, parseNode.content);
+    element = new templates.Element(tagName, attributesMap, parseNode.content, hooks);
     parseNode.parent.content.push(element);
   }
 }
@@ -260,13 +261,13 @@ function hooksFromAttributes(attributes) {
   var hooks = [];
 
   if (attributes.as) {
-    var segments = attributes.as.split('.');
+    var segments = attributes.as.data.split('.');
     hooks.push(new templates.MarkupAs(segments));
     delete attributes.as;
   }
 
   if (attributes.on) {
-    var expression = createPathExpression('{' + attributes.on + '}');
+    var expression = createPathExpression('{' + attributes.on.data + '}');
     console.log(expression)
     // for (var key in attributes) {
     //   hooks.push(new templates.ComponentOn(name, expression));
