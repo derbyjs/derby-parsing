@@ -367,29 +367,37 @@ function parseViewExpression(expression) {
 
 function attributesFromExpression(expression) {
   if (!expression) return;
+  var object = objectFromObjectExpression(expression);
 
   var viewAttributes = new templates.ViewAttributes();
+  for (var key in object) {
+    var value = object[key];
+    viewAttributes[key] =
+      (value instanceof expressions.LiteralExpression) ? value.value :
+      (value instanceof expressions.Expression) ?
+        new templates.ParentWrapper(new templates.DynamicText(value)) :
+      value;
+  }
+  return viewAttributes;
+}
 
-  // Turn a single object literal into a map with literal expressions as keys
+function objectFromObjectExpression(expression) {
   if (expression instanceof expressions.LiteralExpression) {
     var object = expression.value;
     if (typeof object !== 'object') unexpected();
-    for (var key in object) {
-      viewAttributes[key] = object[key];
-    }
-    return viewAttributes;
+    return object;
 
   // Get the expressions and keys from a OperatorExpression that would have been
   // created for an object literal with non-literal properties
   } else if (expression instanceof expressions.OperatorExpression && expression.name === '{}') {
-    for (var i = 0, len = expression.args.length; i < len; i += 2) {
-      var key = expression.args[i].value;
-      var valueExpression = expression.args[i + 1];
-      viewAttributes[key] = (valueExpression instanceof expressions.LiteralExpression) ?
-        valueExpression.value :
-        new templates.ParentWrapper(new templates.DynamicText(valueExpression));
+    var object = {};
+    var args = expression.args;
+    for (var i = 0, len = args.length; i < len; i += 2) {
+      var key = args[i].value;
+      var value = args[i + 1];
+      object[key] = value;
     }
-    return viewAttributes;
+    return object;
 
   } else {
     unexpected();
