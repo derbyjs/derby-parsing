@@ -206,8 +206,9 @@ function parseViewElement(element) {
 
   if (nameAttribute.template) {
     var viewAttributes = viewAttributesFromElement(element);
+    var hooks = hooksFromViewAttributes(viewAttributes);
     var remaining = element.content;
-    var viewPointer = new templates.DynamicViewPointer(nameAttribute.template, viewAttributes);
+    var viewPointer = new templates.DynamicViewPointer(nameAttribute.template, viewAttributes, hooks);
     finishParseViewElement(viewAttributes, remaining, viewPointer);
   } else {
     var name = nameAttribute.data;
@@ -224,8 +225,9 @@ function findView(name) {
 
 function parseNamedViewElement(element, view, name) {
   var viewAttributes = viewAttributesFromElement(element);
+  var hooks = hooksFromViewAttributes(viewAttributes);
   var remaining = parseContentAttributes(element.content, view, viewAttributes);
-  var viewPointer = new templates.ViewPointer(view.name, viewAttributes, view);
+  var viewPointer = new templates.ViewPointer(view.name, viewAttributes, hooks, view);
   finishParseViewElement(viewAttributes, remaining, viewPointer);
 }
 
@@ -251,6 +253,24 @@ function viewAttributesFromElement(element) {
       attribute.data;
   }
   return viewAttributes;
+}
+
+function hooksFromViewAttributes(viewAttributes) {
+  var hooks = [];
+  if (viewAttributes.as) {
+    var segments = viewAttributes.as.split('.');
+    hooks.push(new templates.MarkupAs(segments));
+    delete viewAttributes.as;
+  }
+  if (viewAttributes.on) {
+    var expression = createPathExpression('{' + viewAttributes.on + '}');
+    console.log(expression)
+    // for (var key in attributes) {
+    //   hooks.push(new templates.ComponentOn(name, expression));
+    // }
+    delete viewAttributes.on;
+  }
+  if (hooks.length) return hooks;
 }
 
 function dashToCamelCase(string) {
@@ -325,6 +345,7 @@ function parseViewExpression(expression) {
   }
 
   var viewAttributes = attributesFromExpression(attributesExpression);
+  var hooks = hooksFromViewAttributes(viewAttributes);
 
   // A ViewPointer has a static name, and a DynamicViewPointer gets its name
   // at render time
@@ -332,9 +353,9 @@ function parseViewExpression(expression) {
   if (nameExpression instanceof expressions.LiteralExpression) {
     var name = nameExpression.get();
     var view = findView(name);
-    viewPointer = new templates.ViewPointer(name, viewAttributes, view);
+    viewPointer = new templates.ViewPointer(name, viewAttributes, hooks, view);
   } else {
-    viewPointer = new templates.DynamicViewPointer(nameExpression, viewAttributes);
+    viewPointer = new templates.DynamicViewPointer(nameExpression, hooks, viewAttributes);
   }
   parseNode.content.push(viewPointer);
 }
