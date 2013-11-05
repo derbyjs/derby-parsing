@@ -206,7 +206,7 @@ function parseViewElement(element) {
 
   if (nameAttribute.template) {
     var viewAttributes = viewAttributesFromElement(element);
-    var hooks = hooksFromViewAttributes(viewAttributes);
+    var hooks = hooksFromAttributes(viewAttributes);
     var remaining = element.content;
     var viewPointer = new templates.DynamicViewPointer(nameAttribute.template, viewAttributes, hooks);
     finishParseViewElement(viewAttributes, remaining, viewPointer);
@@ -225,7 +225,7 @@ function findView(name) {
 
 function parseNamedViewElement(element, view, name) {
   var viewAttributes = viewAttributesFromElement(element);
-  var hooks = hooksFromViewAttributes(viewAttributes);
+  var hooks = hooksFromAttributes(viewAttributes);
   var remaining = parseContentAttributes(element.content, view, viewAttributes);
   var viewPointer = new templates.ViewPointer(view.name, viewAttributes, hooks, view);
   finishParseViewElement(viewAttributes, remaining, viewPointer);
@@ -255,21 +255,25 @@ function viewAttributesFromElement(element) {
   return viewAttributes;
 }
 
-function hooksFromViewAttributes(viewAttributes) {
+function hooksFromAttributes(attributes) {
+  if (!attributes) return;
   var hooks = [];
-  if (viewAttributes.as) {
-    var segments = viewAttributes.as.split('.');
+
+  if (attributes.as) {
+    var segments = attributes.as.split('.');
     hooks.push(new templates.MarkupAs(segments));
-    delete viewAttributes.as;
+    delete attributes.as;
   }
-  if (viewAttributes.on) {
-    var expression = createPathExpression('{' + viewAttributes.on + '}');
+
+  if (attributes.on) {
+    var expression = createPathExpression('{' + attributes.on + '}');
     console.log(expression)
     // for (var key in attributes) {
     //   hooks.push(new templates.ComponentOn(name, expression));
     // }
-    delete viewAttributes.on;
+    delete attributes.on;
   }
+
   if (hooks.length) return hooks;
 }
 
@@ -345,7 +349,7 @@ function parseViewExpression(expression) {
   }
 
   var viewAttributes = attributesFromExpression(attributesExpression);
-  var hooks = hooksFromViewAttributes(viewAttributes);
+  var hooks = hooksFromAttributes(viewAttributes);
 
   // A ViewPointer has a static name, and a DynamicViewPointer gets its name
   // at render time
