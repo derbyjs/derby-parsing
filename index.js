@@ -101,7 +101,7 @@ function parseAttributes(attributes) {
 function parseHtmlEnd(tag, tagName) {
   parseNode = parseNode.parent;
   var last = parseNode.last();
-  if (!(last instanceof templates.Element && last.tag === tagName)) {
+  if (!(last instanceof templates.Element && last.tagName === tagName)) {
     throw new Error('Mismatched closing HTML tag: ' + tag);
   }
   if (tagName === 'view') {
@@ -289,7 +289,7 @@ function parseContentAttributes(content, view, viewAttributes) {
   var remaining = [];
   for (var i = 0, len = content.length; i < len; i++) {
     var item = content[i];
-    var name = (item instanceof templates.Element) && item.tag;
+    var name = (item instanceof templates.Element) && item.tagName;
 
     if (name === 'attribute') {
       var name = parseNameAttribute(item);
@@ -316,7 +316,7 @@ function parseNameAttribute(element) {
   var nameAttribute = element.attributes.name;
   var name = nameAttribute.data;
   if (!name) {
-    throw new Error('The <' + element.tag + '> element requires a literal name attribute');
+    throw new Error('The <' + element.tagName + '> element requires a literal name attribute');
   }
   delete element.attributes.name;
   return name;
