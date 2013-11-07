@@ -51,16 +51,16 @@ function createStringTemplate(source, view) {
   return new templates.Template(parseNode.content);
 }
 
-function parseHtmlStart(tag, tagName, attributes) {
+function parseHtmlStart(tag, tagName, attributes, selfClosing) {
   var attributesMap = parseAttributes(attributes);
   var hooks = hooksFromAttributes(attributesMap, 'Element');
-  var element;
-  if (templates.VOID_ELEMENTS[tagName]) {
-    element = new templates.Element(tagName, attributesMap, null, hooks);
+  if (selfClosing || templates.VOID_ELEMENTS[tagName]) {
+    var element = new templates.Element(tagName, attributesMap, null, selfClosing, hooks);
     parseNode.content.push(element);
+    if (selfClosing) parseElementClose(tagName);
   } else {
     parseNode = parseNode.child();
-    element = new templates.Element(tagName, attributesMap, parseNode.content, hooks);
+    var element = new templates.Element(tagName, attributesMap, parseNode.content, selfClosing, hooks);
     parseNode.parent.content.push(element);
   }
 }
@@ -104,6 +104,10 @@ function parseHtmlEnd(tag, tagName) {
   if (!(last instanceof templates.Element && last.tagName === tagName)) {
     throw new Error('Mismatched closing HTML tag: ' + tag);
   }
+  parseElementClose(tagName);
+}
+
+function parseElementClose(tagName) {
   if (tagName === 'view') {
     var element = parseNode.content.pop();
     parseViewElement(element);
@@ -128,10 +132,25 @@ function parseHtmlComment(tag, data) {
   parseNode.content.push(comment);
 }
 
+var doctypeRegExp = /^<!DOCTYPE\s+([^\s]+)(?:\s+(PUBLIC|SYSTEM)\s+"([^"]+)"(?:\s+"([^"]+)")?)?\s*>/i;
+
 function parseHtmlOther(tag) {
-  // Parse doctype literally
-  var text = new expressions.LiteralExpression(tag);
-  parseNode.content.push(text);
+  var match = doctypeRegExp.exec(tag);
+  if (match) {
+    var name = match[1];
+    var idType = match[2] && match[2].toLowerCase();
+    var publicId, systemId;
+    if (idType === 'public') {
+      publicId = match[3];
+      systemId = match[4];
+    } else if (idType === 'system') {
+      systemId = match[3];
+    }
+    var doctype = new templates.Doctype(name, publicId, systemId);
+    parseNode.content.push(doctype);
+  } else {
+    unexpected(tag);
+  }
 }
 
 function parseTextLiteral(data) {

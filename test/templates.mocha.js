@@ -34,7 +34,13 @@ describe('Parse and render literal HTML', function() {
   , 'nested divs': '<div><div></div></div>'
   , 'sibling divs': '<div></div><div></div>'
   , 'input': '<input type="text">'
+  , 'self-closing input': '<input type="text" />'
   , 'void and nonvoid elements': '<div><img><br><b>Hi</b></div><br><div></div>'
+  , 'HTML5 doctype': '<!DOCTYPE html>'
+  , 'HTML4 doctype': '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">'
+  , 'XHTML doctype': '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
+  , 'MathML 1.01 doctype': '<!DOCTYPE math SYSTEM "http://www.w3.org/Math/DTD/mathml1/mathml.dtd">'
+  , 'html5 basic page': '<!DOCTYPE html><html><head><title></title></head><body><p></p></body></html>'
   }
 
   for (var name in literalTests) {
