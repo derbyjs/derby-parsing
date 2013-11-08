@@ -3,6 +3,7 @@ var templates = require('derby-templates');
 var expressions = require('derby-expressions').expressions;
 var createPathExpression = require('derby-expressions/create');
 
+exports.templates = templates;
 exports.createTemplate = createTemplate;
 exports.createStringTemplate = createStringTemplate;
 exports.createExpression = createExpression;
@@ -42,6 +43,19 @@ function createTemplate(source, view) {
   , comment: parseHtmlComment
   , other: parseHtmlOther
   });
+  // Allow for elements at the end of a template to not be closed. This is
+  // especially important so that the </body> and </html> tags can be omitted,
+  // since Derby sends an additional script tag after the HTML for the page
+  while (parseNode.parent) {
+    parseNode = parseNode.parent;
+    var last = parseNode.last()
+    if (last instanceof templates.Element) {
+      last.notClosed = true;
+      last.endTag = '';
+      continue;
+    }
+    unexpected();
+  }
   return new templates.Template(parseNode.content);
 }
 
@@ -55,12 +69,12 @@ function parseHtmlStart(tag, tagName, attributes, selfClosing) {
   var attributesMap = parseAttributes(attributes);
   var hooks = hooksFromAttributes(attributesMap, 'Element');
   if (selfClosing || templates.VOID_ELEMENTS[tagName]) {
-    var element = new templates.Element(tagName, attributesMap, null, selfClosing, hooks);
+    var element = new templates.Element(tagName, attributesMap, null, hooks, selfClosing);
     parseNode.content.push(element);
     if (selfClosing) parseElementClose(tagName);
   } else {
     parseNode = parseNode.child();
-    var element = new templates.Element(tagName, attributesMap, parseNode.content, selfClosing, hooks);
+    var element = new templates.Element(tagName, attributesMap, parseNode.content, hooks, selfClosing);
     parseNode.parent.content.push(element);
   }
 }

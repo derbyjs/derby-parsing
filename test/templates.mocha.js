@@ -41,6 +41,7 @@ describe('Parse and render literal HTML', function() {
   , 'XHTML doctype': '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
   , 'MathML 1.01 doctype': '<!DOCTYPE math SYSTEM "http://www.w3.org/Math/DTD/mathml1/mathml.dtd">'
   , 'html5 basic page': '<!DOCTYPE html><html><head><title></title></head><body><p></p></body></html>'
+  , 'page missing end body and html tags': '<!DOCTYPE html><html><head><title></title></head><body><p></p>'
   }
 
   for (var name in literalTests) {
