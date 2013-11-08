@@ -227,7 +227,7 @@ function parseViewElement(element) {
   if (nameAttribute.template) {
     var viewAttributes = viewAttributesFromElement(element);
     var hooks = hooksFromAttributes(viewAttributes, 'Component');
-    var remaining = element.content;
+    var remaining = element.content || [];
     var viewPointer = new templates.DynamicViewPointer(nameAttribute.template, viewAttributes, hooks);
     finishParseViewElement(viewAttributes, remaining, viewPointer);
   } else {
@@ -306,6 +306,7 @@ function dashToCamelCase(string) {
 
 function parseContentAttributes(content, view, viewAttributes) {
   var remaining = [];
+  if (!content) return remaining;
   for (var i = 0, len = content.length; i < len; i++) {
     var item = content[i];
     var name = (item instanceof templates.Element) && item.tagName;

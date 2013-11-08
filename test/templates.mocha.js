@@ -177,6 +177,7 @@ describe('View insertion', function() {
     }
     test('{{view "section"}}');
     test('<view name="section"></view>');
+    test('<view name="section" />');
   });
 
   describe('inserts a dynamic view', function() {
@@ -192,6 +193,7 @@ describe('View insertion', function() {
     }
     test('{{view _page.view}}');
     test('<view name="{{_page.view}}"></view>');
+    test('<view name="{{_page.view}}" />');
   });
 
   describe('inserts a view with literal arguments', function() {
@@ -207,6 +209,7 @@ describe('View insertion', function() {
     }
     test('{{view "section", {text: "Hi"}}}');
     test('<view name="section" text="Hi"></view>');
+    test('<view name="section" text="Hi" />');
   });
 
   describe('dashed html view arguments become camel cased', function() {
@@ -222,6 +225,7 @@ describe('View insertion', function() {
     }
     test('{{view "section", {messageText: "Hi"}}}');
     test('<view name="section" message-text="Hi"></view>');
+    test('<view name="section" message-text="Hi" />');
   });
 
   describe('inserts a view with dynamic arguments', function() {
@@ -237,6 +241,7 @@ describe('View insertion', function() {
     }
     test('{{view "section", {text: _page.greeting}}}');
     test('<view name="section" text="{{_page.greeting}}"></view>');
+    test('<view name="section" text="{{_page.greeting}}" />');
   });
 
   it('passes HTML inside <view> as {{@content}}', function() {
