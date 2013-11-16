@@ -242,8 +242,8 @@ function parseViewElement(element) {
     var viewAttributes = viewAttributesFromElement(element);
     var hooks = hooksFromAttributes(viewAttributes, 'Component');
     var remaining = element.content || [];
-    var viewPointer = new templates.DynamicViewPointer(nameAttribute.template, viewAttributes, hooks);
-    finishParseViewElement(viewAttributes, remaining, viewPointer);
+    var viewInstance = new templates.DynamicViewInstance(nameAttribute.template, viewAttributes, hooks);
+    finishParseViewElement(viewAttributes, remaining, viewInstance);
   } else {
     var name = nameAttribute.data;
     var view = findView(name);
@@ -261,17 +261,17 @@ function parseNamedViewElement(element, view, name) {
   var viewAttributes = viewAttributesFromElement(element);
   var hooks = hooksFromAttributes(viewAttributes, 'Component');
   var remaining = parseContentAttributes(element.content, view, viewAttributes);
-  var viewPointer = new templates.ViewPointer(view.name, viewAttributes, hooks, view);
-  finishParseViewElement(viewAttributes, remaining, viewPointer);
+  var viewInstance = new templates.ViewInstance(view.name, viewAttributes, hooks, view);
+  finishParseViewElement(viewAttributes, remaining, viewInstance);
 }
 
-function finishParseViewElement(viewAttributes, remaining, viewPointer) {
+function finishParseViewElement(viewAttributes, remaining, viewInstance) {
   if (!viewAttributes.hasOwnProperty('content') && remaining.length) {
     viewAttributes.content = new templates.ParentWrapper(
       new templates.Template(remaining)
     );
   }
-  parseNode.content.push(viewPointer);
+  parseNode.content.push(viewInstance);
 }
 
 function viewAttributesFromElement(element) {
@@ -387,17 +387,17 @@ function parseViewExpression(expression) {
   var viewAttributes = attributesFromExpression(attributesExpression);
   var hooks = hooksFromAttributes(viewAttributes, 'Component');
 
-  // A ViewPointer has a static name, and a DynamicViewPointer gets its name
+  // A ViewInstance has a static name, and a DynamicViewInstance gets its name
   // at render time
-  var viewPointer;
+  var viewInstance;
   if (nameExpression instanceof expressions.LiteralExpression) {
     var name = nameExpression.get();
     var view = findView(name);
-    viewPointer = new templates.ViewPointer(name, viewAttributes, hooks, view);
+    viewInstance = new templates.ViewInstance(name, viewAttributes, hooks, view);
   } else {
-    viewPointer = new templates.DynamicViewPointer(nameExpression, hooks, viewAttributes);
+    viewInstance = new templates.DynamicViewInstance(nameExpression, hooks, viewAttributes);
   }
-  parseNode.content.push(viewPointer);
+  parseNode.content.push(viewInstance);
 }
 
 function attributesFromExpression(expression) {
