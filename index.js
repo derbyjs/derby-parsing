@@ -66,8 +66,10 @@ function createStringTemplate(source, view) {
 }
 
 function parseHtmlStart(tag, tagName, attributes, selfClosing) {
+  if (tagName !== 'view' && !viewForTagName(tagName)) {
+    var hooks = hooksFromAttributes(attributes, 'Element');
+  }
   var attributesMap = parseAttributes(attributes);
-  var hooks = hooksFromAttributes(attributesMap, 'Element');
   if (selfClosing || templates.VOID_ELEMENTS[tagName]) {
     var element = new templates.Element(tagName, attributesMap, null, hooks, selfClosing);
     parseNode.content.push(element);
@@ -127,11 +129,15 @@ function parseElementClose(tagName) {
     parseViewElement(element);
     return;
   }
-  var view = parseNode.view && parseNode.view.views.elementMap[tagName];
+  var view = viewForTagName(tagName);
   if (view) {
     var element = parseNode.content.pop();
     parseNamedViewElement(element, view, view.name);
   }
+}
+
+function viewForTagName(tagName) {
+  return parseNode.view && parseNode.view.views.elementMap[tagName];
 }
 
 function parseHtmlText(data) {
@@ -294,13 +300,13 @@ function hooksFromAttributes(attributes, type) {
   var hooks = [];
 
   if (attributes.as) {
-    var segments = attributes.as.data.split('.');
+    var segments = attributes.as.split('.');
     hooks.push(new templates.MarkupAs(segments));
     delete attributes.as;
   }
 
   if (attributes.on) {
-    var expression = createPathExpression('{' + attributes.on.data + '}');
+    var expression = createPathExpression('{' + attributes.on + '}');
     var events = objectFromObjectExpression(expression);
     var constructor = templates[type + 'On'];
     for (var name in events) {
@@ -384,7 +390,7 @@ function parseViewExpression(expression) {
     nameExpression = expression;
   }
 
-  var viewAttributes = attributesFromExpression(attributesExpression);
+  var viewAttributes = viewAttributesFromExpression(attributesExpression);
   var hooks = hooksFromAttributes(viewAttributes, 'Component');
 
   // A ViewInstance has a static name, and a DynamicViewInstance gets its name
@@ -400,7 +406,7 @@ function parseViewExpression(expression) {
   parseNode.content.push(viewInstance);
 }
 
-function attributesFromExpression(expression) {
+function viewAttributesFromExpression(expression) {
   if (!expression) return;
   var object = objectFromObjectExpression(expression);
 
