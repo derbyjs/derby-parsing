@@ -2,6 +2,7 @@ var htmlUtil = require('html-util');
 var templates = require('derby-templates');
 var expressions = require('derby-expressions').expressions;
 var createPathExpression = require('derby-expressions/create');
+var markup = require('./lib/markup');
 
 exports.templates = templates;
 exports.createTemplate = createTemplate;
@@ -73,7 +74,7 @@ function parseHtmlStart(tag, tagName, attributes, selfClosing) {
   if (selfClosing || templates.VOID_ELEMENTS[tagName]) {
     var element = new templates.Element(tagName, attributesMap, null, hooks, selfClosing);
     parseNode.content.push(element);
-    if (selfClosing) parseElementClose(tagName);
+    parseElementClose(tagName);
   } else {
     parseNode = parseNode.child();
     var element = new templates.Element(tagName, attributesMap, parseNode.content, hooks, selfClosing);
@@ -133,7 +134,11 @@ function parseElementClose(tagName) {
   if (view) {
     var element = parseNode.content.pop();
     parseNamedViewElement(element, view, view.name);
+    return;
   }
+  var element = parseNode.last();
+  markup.emit('element', element);
+  markup.emit('element:' + tagName, element);
 }
 
 function viewForTagName(tagName) {
