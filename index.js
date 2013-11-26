@@ -85,7 +85,7 @@ function parseHtmlStart(tag, tagName, attributes, selfClosing) {
 function parseAttributes(attributes) {
   var attributesMap;
   for (var key in attributes) {
-    if (!attributesMap) attributesMap = new templates.AttributesMap();
+    if (!attributesMap) attributesMap = {};
 
     var value = attributes[key];
     if (value === '' || typeof value !== 'string') {
