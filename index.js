@@ -272,7 +272,7 @@ function parseNamedViewElement(element, view, name) {
   var viewAttributes = viewAttributesFromElement(element);
   var hooks = hooksFromAttributes(viewAttributes, 'Component');
   var remaining = parseContentAttributes(element.content, view, viewAttributes);
-  var viewInstance = new templates.ViewInstance(view.name, viewAttributes, hooks, view);
+  var viewInstance = new templates.ViewInstance(view.name, viewAttributes, hooks);
   finishParseViewElement(viewAttributes, remaining, viewInstance);
 }
 
@@ -403,8 +403,9 @@ function parseViewExpression(expression) {
   var viewInstance;
   if (nameExpression instanceof expressions.LiteralExpression) {
     var name = nameExpression.get();
-    var view = findView(name);
-    viewInstance = new templates.ViewInstance(name, viewAttributes, hooks, view);
+    // Will throw if the view can't be found immediately
+    findView(name);
+    viewInstance = new templates.ViewInstance(name, viewAttributes, hooks);
   } else {
     viewInstance = new templates.DynamicViewInstance(nameExpression, hooks, viewAttributes);
   }
