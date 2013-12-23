@@ -145,8 +145,8 @@ function viewForTagName(tagName) {
   return parseNode.view && parseNode.view.views.elementMap[tagName];
 }
 
-function parseHtmlText(data) {
-  var unescaped = htmlUtil.unescapeEntities(data);
+function parseHtmlText(data, isRawText) {
+  var unescaped = (isRawText) ? data : htmlUtil.unescapeEntities(data);
   parseText(unescaped, parseTextLiteral, parseTextExpression);
 }
 
