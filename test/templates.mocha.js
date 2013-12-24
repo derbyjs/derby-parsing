@@ -153,6 +153,17 @@ describe('Parse and render dynamic text and blocks', function() {
     );
   });
 
+  it('alias to each block', function() {
+    test('{{each _page.letters as #letter}}{{#letter}}:{{/each}}', 'A:B:C:');
+    test('{{each [1, 2, 3] as #number}}{{#number * 2}}{{/each}}', '246');
+    test('{{each [1, _page.zero, 3] as #number}}{{#number * 2}}{{/each}}', '206');
+    test('{{each [2, 1, 0] as #number}}{{_page.letters[#number]}}{{/each}}', 'CBA');
+    test('{{each _page.matrix[1] as #number}}{{#number}}:{{/each}}', '1:0:');
+  });
+
+  it('index alias to each block', function() {
+    test('{{each _page.letters as #letter, #i}}{{#i + 1}}:{{#letter}};{{/each}}', '1:A;2:B;3:C;');
+  });
 });
 
 describe('View insertion', function() {

@@ -521,7 +521,7 @@ function matchBraces(text, num, i, openChar, closeChar) {
   return i;
 }
 
-var blockRegExp = /^(if|unless|else if|each|with)\s+([\s\S]+?)(?:\s+as\s+(\S+))?$/;
+var blockRegExp = /^(if|unless|else if|each|with)\s+([\s\S]+?)(?:\s+as\s+([^,\s]+)\s*(?:,\s*(\S+))?)?$/;
 var valueRegExp = /^(?:(view|unbound|bound|unescaped)\s+)?([\s\S]*)/;
 
 function createExpression(source) {
@@ -539,6 +539,7 @@ function createExpression(source) {
     meta.blockType = match[1];
     path = match[2];
     meta.as = match[3];
+    meta.keyAs = match[4];
 
   // The blocks `else`, `unbound`, and `bound` may not have a path or alias
   } else if (source === 'else' || source === 'unbound' || source === 'bound') {
