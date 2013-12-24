@@ -249,11 +249,11 @@ function parseViewElement(element) {
   }
   delete element.attributes.name;
 
-  if (nameAttribute.template) {
+  if (nameAttribute.expression) {
     var viewAttributes = viewAttributesFromElement(element);
     var hooks = hooksFromAttributes(viewAttributes, 'Component');
     var remaining = element.content || [];
-    var viewInstance = new templates.DynamicViewInstance(nameAttribute.template, viewAttributes, hooks);
+    var viewInstance = new templates.DynamicViewInstance(nameAttribute.expression, viewAttributes, hooks);
     finishParseViewElement(viewAttributes, remaining, viewInstance);
   } else {
     var name = nameAttribute.data;
@@ -291,10 +291,10 @@ function viewAttributesFromElement(element) {
     var attribute = element.attributes[key];
     var camelCased = dashToCamelCase(key);
     viewAttributes[camelCased] =
-      (attribute.template instanceof templates.Template) ?
-        new templates.ParentWrapper(attribute.template) :
-      (attribute.template instanceof expressions.Expression) ?
-        new templates.ParentWrapper(new templates.DynamicText(attribute.template), attribute.template) :
+      (attribute.expression instanceof templates.Template) ?
+        new templates.ParentWrapper(attribute.expression) :
+      (attribute.expression instanceof expressions.Expression) ?
+        new templates.ParentWrapper(new templates.DynamicText(attribute.expression), attribute.expression) :
       attribute.data;
   }
   return viewAttributes;
