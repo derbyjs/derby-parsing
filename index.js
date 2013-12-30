@@ -286,7 +286,7 @@ function finishParseViewElement(viewAttributes, remaining, viewInstance) {
 }
 
 function viewAttributesFromElement(element) {
-  var viewAttributes = new templates.ViewAttributes();
+  var viewAttributes = {};
   for (var key in element.attributes) {
     var attribute = element.attributes[key];
     var camelCased = dashToCamelCase(key);
@@ -416,13 +416,13 @@ function viewAttributesFromExpression(expression) {
   if (!expression) return;
   var object = objectFromObjectExpression(expression);
 
-  var viewAttributes = new templates.ViewAttributes();
+  var viewAttributes = {};
   for (var key in object) {
     var value = object[key];
     viewAttributes[key] =
       (value instanceof expressions.LiteralExpression) ? value.value :
       (value instanceof expressions.Expression) ?
-        new templates.ParentWrapper(new templates.DynamicText(value)) :
+        new templates.ParentWrapper(new templates.DynamicText(value), value) :
       value;
   }
   return viewAttributes;
