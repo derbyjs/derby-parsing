@@ -98,9 +98,13 @@ function parseAttributes(attributes) {
 
     if (parseNode.content.length === 1) {
       var item = parseNode.content[0];
-      attributesMap[key] = (item instanceof templates.Text) ? new templates.Attribute(item.data) :
-        (item.expression instanceof expressions.LiteralExpression) ? new templates.Attribute(item.expression.value) :
-        new templates.DynamicAttribute(item.expression);
+      attributesMap[key] =
+        (item instanceof templates.Text) ? new templates.Attribute(item.data) :
+        (item instanceof templates.DynamicText) ?
+          (item.expression instanceof expressions.LiteralExpression) ?
+            new templates.Attribute(item.expression.value) :
+            new templates.DynamicAttribute(item.expression) :
+          new templates.DynamicAttribute(item);
 
     } else if (parseNode.content.length > 1) {
       var template = new templates.Template(parseNode.content);

@@ -166,6 +166,17 @@ describe('Parse and render dynamic text and blocks', function() {
   });
 });
 
+describe('Parse and render HTML and blocks', function() {
+  function test(source, expected) {
+    var template = parser.createTemplate(source);
+    expect(template.get(context)).equal(expected);
+  }
+
+  it('block within an element attribute', function() {
+    test('<div class="{{if _page.yep}}show{{/}}"></div>', '<div class="show"></div>');
+  });
+});
+
 describe('View insertion', function() {
 
   it('can register and find a view', function() {
