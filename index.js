@@ -267,7 +267,7 @@ function parseViewElement(element) {
 }
 
 function findView(name) {
-  var view = parseNode.view.views.find(name, parseNode.view.at);
+  var view = parseNode.view.views.find(name, parseNode.view.namespace);
   if (!view) throw new Error('No view found for "' + name + '"');
   return view;
 }
