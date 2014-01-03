@@ -268,7 +268,10 @@ function parseViewElement(element) {
 
 function findView(name) {
   var view = parseNode.view.views.find(name, parseNode.view.namespace);
-  if (!view) throw new Error('No view found for "' + name + '"');
+  if (!view) {
+    var message = parseNode.view.views.findErrorMessage(name);
+    throw new Error(message);
+  }
   return view;
 }
 
@@ -276,7 +279,7 @@ function parseNamedViewElement(element, view, name) {
   var viewAttributes = viewAttributesFromElement(element);
   var hooks = hooksFromAttributes(viewAttributes, 'Component');
   var remaining = parseContentAttributes(element.content, view, viewAttributes);
-  var viewInstance = new templates.ViewInstance(view.name, viewAttributes, hooks);
+  var viewInstance = new templates.ViewInstance(view.registeredName, viewAttributes, hooks);
   finishParseViewElement(viewAttributes, remaining, viewInstance);
 }
 
