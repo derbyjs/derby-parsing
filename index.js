@@ -355,7 +355,7 @@ function parseContentAttributes(content, view, viewAttributes) {
       parseArrayElement(item, name, viewAttributes);
 
     } else if (view.arraysMap && view.arraysMap[name]) {
-      parseArrayElement(item, name, viewAttributes);
+      parseArrayElement(item, view.arraysMap[name], viewAttributes);
 
     } else {
       remaining.push(item);

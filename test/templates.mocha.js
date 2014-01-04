@@ -350,14 +350,14 @@ describe('View insertion', function() {
     );
     views.register('tabs'
     , '<ul>' +
-        '{{each @pane}}' +
+        '{{each @panes}}' +
           '<li>{{this.title}}</li>' +
         '{{/each}}' +
       '</ul>' +
-      '{{each @pane}}' +
+      '{{each @panes}}' +
         '<div>{{this.content}}</div>' +
       '{{/each}}'
-    , {arrays: 'pane'}
+    , {arrays: 'pane/panes'}
     );
     var view = views.find('body');
     expect(view.get(context)).equal(
@@ -375,17 +375,17 @@ describe('View insertion', function() {
     context.meta.views = views;
     views.register('body'
     , '<view name="tabs">' +
-        '<array name="pane" title="One"><b>Hi</b></array>' +
-        '<array name="pane" title="Two">Ho</array>' +
+        '<array name="panes" title="One"><b>Hi</b></array>' +
+        '<array name="panes" title="Two">Ho</array>' +
       '</view>'
     );
     views.register('tabs'
     , '<ul>' +
-        '{{each @pane}}' +
+        '{{each @panes}}' +
           '<li>{{this.title}}</li>' +
         '{{/each}}' +
       '</ul>' +
-      '{{each @pane}}' +
+      '{{each @panes}}' +
         '<div>{{this.content}}</div>' +
       '{{/each}}'
     );
