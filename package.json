@@ -1,14 +1,14 @@
 {
-  "name": "derby-html-parser",
+  "name": "derby-parsing",
   "version": "0.0.1",
   "description": "Add HTML template parsing to Derby",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "mocha --recursive test --timeout 5000 --bail --colors --reporter spec --debug"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/codeparty/derby-html-parser.git"
+    "url": "git://github.com/codeparty/derby-parsing.git"
   },
   "keywords": [
     "derby"
@@ -16,11 +16,11 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/codeparty/derby-html-parser/issues"
+    "url": "https://github.com/codeparty/derby-parsing/issues"
   },
   "dependencies": {
     "derby-templates": "~0.0.1",
-    "derby-expressions": "~0.0.1",
+    "esprima-derby": "~1.1.0-dev",
     "html-util": "~0.1.5"
   },
   "devDependencies": {
