@@ -11,7 +11,7 @@ describe('template truthy', function() {
     expect(parsing.createExpression('if []').truthy()).equal(false);
 
     expect(parsing.createExpression('if true').truthy()).equal(true);
-    expect(parsing.createExpression('if 0').truthy()).equal(true);
+    expect(parsing.createExpression('if 0').truthy()).equal(false);
     expect(parsing.createExpression('if 1').truthy()).equal(true);
     expect(parsing.createExpression('if "Hi"').truthy()).equal(true);
     expect(parsing.createExpression('if [0]').truthy()).equal(true);
@@ -27,7 +27,7 @@ describe('template truthy', function() {
     expect(parsing.createExpression('unless []').truthy()).equal(true);
 
     expect(parsing.createExpression('unless true').truthy()).equal(false);
-    expect(parsing.createExpression('unless 0').truthy()).equal(false);
+    expect(parsing.createExpression('unless 0').truthy()).equal(true);
     expect(parsing.createExpression('unless 1').truthy()).equal(false);
     expect(parsing.createExpression('unless "Hi"').truthy()).equal(false);
     expect(parsing.createExpression('unless [0]').truthy()).equal(false);
