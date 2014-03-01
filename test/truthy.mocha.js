@@ -36,7 +36,7 @@ describe('template truthy', function() {
   });
 
   it('gets always truthy value for else block', function() {
-    parsing.createExpression('else')
+    parsing.createExpression('else');
     expect(parsing.createExpression('else').truthy()).equal(true);
   });
 

@@ -265,7 +265,7 @@ describe('Expression::get', function() {
     expect(create('false').get()).equal(false);
     // Strings
     expect(create('""').get()).equal('');
-    expect(create("'Howdy'").get()).equal('Howdy');
+    expect(create('\'Howdy\'').get()).equal('Howdy');
     // Regular Expressions
     var re = create('/([0-9]+)/').get();
     expect(re).to.be.a(RegExp);
@@ -296,7 +296,7 @@ describe('Expression::get', function() {
 
   it('gets literals modified by a boolean operator', function() {
     expect(create('false || null').get()).equal(null);
-    expect(create('"" && 3').get()).equal("");
+    expect(create('"" && 3').get()).equal('');
     expect(create('1 + 1').get()).equal(2);
     expect(create('4 - 3').get()).equal(1);
     expect(create('1 > 0').get()).equal(true);
@@ -332,7 +332,7 @@ describe('Expression::get', function() {
 
   it('gets expressions modified by a conditional operator', function() {
     var expression = create('(_page.key === "green") ? _page.colors.green.name : "Other"');
-    expect(expression.get(context)).to.equal("Green");
+    expect(expression.get(context)).to.equal('Green');
   });
 
   it('gets array literals', function() {
