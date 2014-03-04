@@ -24,8 +24,8 @@
     "html-util": "~0.2.0"
   },
   "devDependencies": {
-    "mocha": "~1.17.1",
     "expect.js": "~0.3.1",
-    "jshint": "~2.4.4"
+    "jshint": "~2.4.4",
+    "mocha": "~1.17.1"
   }
 }

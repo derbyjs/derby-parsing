@@ -8,8 +8,6 @@
   "quotmark": "single",
   "undef": true,
   "trailing": true,
-  "supernew": true,
-  "funcscope": true,
   "shadow": true,
   "expr": true,
   "boss": true,
