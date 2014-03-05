@@ -323,6 +323,24 @@ describe('View insertion', function() {
     expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
   });
 
+  it('views can define custom child attribute tags with dashes', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body'
+    , '<view name="section">' +
+        '<main-title><b>Hi</b></main-title>' +
+        'More text' +
+      '</view>'
+    );
+    views.register('section'
+    , '<h3>{{@mainTitle}}</h3>' +
+      '<div>{{@content}}</div>'
+    , {attributes: 'main-title'}
+    );
+    var view = views.find('body');
+    expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
+  });
+
   it('views support generic attribute tags', function() {
     var views = new templates.Views();
     context.meta.views = views;
