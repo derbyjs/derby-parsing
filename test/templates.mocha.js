@@ -16,6 +16,7 @@ var model = {
     , emptyList: []
     , matrix: [[0, 1], [1, 0]]
     , view: 'section'
+    , html: '<b>Qua?</b>'
     }
   }
 };
@@ -175,6 +176,10 @@ describe('Parse and render HTML and blocks', function() {
 
   it('block within an element attribute', function() {
     test('<div class="{{if _page.yep}}show{{/}}"></div>', '<div class="show"></div>');
+  });
+
+  it('unescaped HTML', function() {
+    test('<div>{{unescaped _page.html}}</div>', '<div><b>Qua?</b></div>');
   });
 });
 
