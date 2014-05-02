@@ -17,6 +17,7 @@ var model = {
     , matrix: [[0, 1], [1, 0]]
     , view: 'section'
     , html: '<b>Qua?</b>'
+    , tag: 'strong'
     }
   }
 };
@@ -180,6 +181,10 @@ describe('Parse and render HTML and blocks', function() {
 
   it('unescaped HTML', function() {
     test('<div>{{unescaped _page.html}}</div>', '<div><b>Qua?</b></div>');
+  });
+
+  it('dynamic element', function() {
+    test('<div><tag is="{{_page.tag}}">Hi</tag></div>', '<div><strong>Hi</strong></div>');
   });
 });
 
