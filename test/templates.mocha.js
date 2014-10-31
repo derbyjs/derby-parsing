@@ -210,8 +210,8 @@ describe('View insertion', function() {
       });
     }
     test('{{view "section"}}');
-    test('<view name="section"></view>');
-    test('<view name="section" />');
+    test('<view is="section"></view>');
+    test('<view is="section" />');
   });
 
   describe('inserts a dynamic view', function() {
@@ -226,8 +226,8 @@ describe('View insertion', function() {
       });
     }
     test('{{view _page.view}}');
-    test('<view name="{{_page.view}}"></view>');
-    test('<view name="{{_page.view}}" />');
+    test('<view is="{{_page.view}}"></view>');
+    test('<view is="{{_page.view}}" />');
   });
 
   describe('inserts a view with literal arguments', function() {
@@ -242,8 +242,8 @@ describe('View insertion', function() {
       });
     }
     test('{{view "section", {text: "Hi"}}}');
-    test('<view name="section" text="Hi"></view>');
-    test('<view name="section" text="Hi" />');
+    test('<view is="section" text="Hi"></view>');
+    test('<view is="section" text="Hi" />');
   });
 
   describe('dashed html view arguments become camel cased', function() {
@@ -258,8 +258,8 @@ describe('View insertion', function() {
       });
     }
     test('{{view "section", {messageText: "Hi"}}}');
-    test('<view name="section" message-text="Hi"></view>');
-    test('<view name="section" message-text="Hi" />');
+    test('<view is="section" message-text="Hi"></view>');
+    test('<view is="section" message-text="Hi" />');
   });
 
   describe('inserts a view with dynamic arguments', function() {
@@ -274,14 +274,14 @@ describe('View insertion', function() {
       });
     }
     test('{{view "section", {text: _page.greeting}}}');
-    test('<view name="section" text="{{_page.greeting}}"></view>');
-    test('<view name="section" text="{{_page.greeting}}" />');
+    test('<view is="section" text="{{_page.greeting}}"></view>');
+    test('<view is="section" text="{{_page.greeting}}" />');
   });
 
   it('passes HTML inside <view> as {{@content}}', function() {
     var views = new templates.Views();
     context.meta.views = views;
-    views.register('body', '<view name="section"><b>Hi</b></view>');
+    views.register('body', '<view is="section"><b>Hi</b></view>');
     views.register('section', '<div>{{@content}}</div>');
     var view = views.find('body');
     expect(view.get(context)).equal('<div><b>Hi</b></div>');
@@ -290,7 +290,7 @@ describe('View insertion', function() {
   it('content can be overridden', function() {
     var views = new templates.Views();
     context.meta.views = views;
-    views.register('body', '<view name="section" content="Stuff"><b>Hi</b></view>');
+    views.register('body', '<view is="section" content="Stuff"><b>Hi</b></view>');
     views.register('section', '<div>{{@content}}</div>');
     var view = views.find('body');
     expect(view.get(context)).equal('<div>Stuff</div>');
@@ -299,8 +299,8 @@ describe('View insertion', function() {
   it('parent content can be passed through', function() {
     var views = new templates.Views();
     context.meta.views = views;
-    views.register('body', '<view name="section"><b>Hi</b></view>');
-    views.register('section', '<div><view name="paragraph" content="{{@content}}"></view></div>');
+    views.register('body', '<view is="section"><b>Hi</b></view>');
+    views.register('section', '<div><view is="paragraph" content="{{@content}}"></view></div>');
     views.register('paragraph', '<p>{{@content}}</p>');
     var view = views.find('body');
     expect(view.get(context)).equal('<div><p><b>Hi</b></p></div>');
@@ -309,7 +309,7 @@ describe('View insertion', function() {
   it('views can define custom child attribute tags', function() {
     var views = new templates.Views();
     context.meta.views = views;
-    views.register('body', '<view name="section"><title><b>Hi</b></title>More text</view>');
+    views.register('body', '<view is="section"><title><b>Hi</b></title>More text</view>');
     views.register('section', '<h3>{{@title}}</h3><div>{{@content}}</div>', {attributes: 'title'});
     var view = views.find('body');
     expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
@@ -319,7 +319,7 @@ describe('View insertion', function() {
     var views = new templates.Views();
     context.meta.views = views;
     views.register('body'
-    , '<view name="section">' +
+    , '<view is="section">' +
         '<title><b>Hi</b></title>' +
         'More text' +
       '</view>'
@@ -337,7 +337,7 @@ describe('View insertion', function() {
     var views = new templates.Views();
     context.meta.views = views;
     views.register('body'
-    , '<view name="section">' +
+    , '<view is="section">' +
         '<main-title><b>Hi</b></main-title>' +
         'More text' +
       '</view>'
@@ -355,8 +355,8 @@ describe('View insertion', function() {
     var views = new templates.Views();
     context.meta.views = views;
     views.register('body'
-    , '<view name="section">' +
-        '<attribute name="title"><b>Hi</b></attribute>' +
+    , '<view is="section">' +
+        '<attribute is="title"><b>Hi</b></attribute>' +
         'More text' +
       '</view>'
     );
@@ -372,7 +372,7 @@ describe('View insertion', function() {
     var views = new templates.Views();
     context.meta.views = views;
     views.register('body'
-    , '<view name="tabs">' +
+    , '<view is="tabs">' +
         '<pane title="One"><b>Hi</b></pane>' +
         '<pane title="Two">Ho</pane>' +
       '</view>'
@@ -403,9 +403,9 @@ describe('View insertion', function() {
     var views = new templates.Views();
     context.meta.views = views;
     views.register('body'
-    , '<view name="tabs">' +
-        '<array name="panes" title="One"><b>Hi</b></array>' +
-        '<array name="panes" title="Two">Ho</array>' +
+    , '<view is="tabs">' +
+        '<array is="panes" title="One"><b>Hi</b></array>' +
+        '<array is="panes" title="Two">Ho</array>' +
       '</view>'
     );
     views.register('tabs'
@@ -435,7 +435,7 @@ describe('View insertion', function() {
     views.register('body'
     , '<ol>' +
         '{{each _page.matrix as #row}}' +
-          '<view name="row"></view>' +
+          '<view is="row"></view>' +
         '{{/each}}' +
       '</ol>'
     );
