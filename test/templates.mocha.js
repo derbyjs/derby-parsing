@@ -186,6 +186,50 @@ describe('Parse and render HTML and blocks', function() {
   it('dynamic element', function() {
     test('<div><tag is="{{_page.tag}}">Hi</tag></div>', '<div><strong>Hi</strong></div>');
   });
+
+  it('less than sign in double braces', function() {
+    test('{{_page.zero < 0}} {{_page.zero <= 0}}', 'false true');
+  });
+
+  it('less than sign in double braces in attribute', function() {
+    test('<div class="{{_page.zero < 0}} {{_page.zero <= 0}}"></div>', '<div class="false true"></div>');
+  });
+
+  it('less than sign in double braces in script tag', function() {
+    test('<script>{{_page.zero < 0}} {{_page.zero <= 0}}</script>', '<script>false true</script>');
+  });
+
+  it('less than sign in string in double braces', function() {
+    test('{{"<div>"}}', '&lt;div>');
+  });
+
+  it('less than sign in string in double braces in attribute', function() {
+    test('<div class="{{&quot;<div>&quot;}}"></div>', '<div class="<div>"></div>');
+  });
+
+  it('less than sign in string in double braces in script tag', function() {
+    test('<script>\'{{"<div>"}}\'</script>', '<script>\'<div>\'</script>');
+  });
+
+  it('amphersand in double braces', function() {
+    test('{{1 && 2}} &lt; {{_page.zero && 2}}', '2 &lt; 0');
+  });
+
+  it('amphersandin double braces in attribute', function() {
+    test('<div class="{{1 && 2}} < {{_page.zero && 2}}"></div>', '<div class="2 < 0"></div>');
+  });
+
+  it('amphersand in double braces in script tag', function() {
+    test('<script>{{1 && 2}} < {{_page.zero && 2}}</script>', '<script>2 < 0</script>');
+  });
+
+  it('braces containing hex escaped literal braces', function() {
+    test('{{"\\x7b\\x7b"}} {{"\\x7d"}}', '{{ }');
+  });
+
+  it('double braces can be escaped with HTML entity', function() {
+    test('&#123;{ }} { {', '{{ }} { {');
+  });
 });
 
 describe('View insertion', function() {
