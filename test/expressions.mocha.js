@@ -59,11 +59,17 @@ controller.model = {
     , nums: [2, 11, 3, 7]
     , first: 2
     , second: 3
+    , date: new Date(1000)
     }
   }
 };
 controller.model.scope = function(path) {
-  return {_at: path};
+  return {
+    _at: path
+  , path: function() {
+      return this._at;
+    }
+  };
 };
 var contextMeta = new contexts.ContextMeta({});
 var context = new contexts.Context(contextMeta, controller);
@@ -241,12 +247,12 @@ describe('Expression::get', function() {
 
   it('gets scoped model expressions', function() {
     var expression = create('$at(_page.nums[0])');
-    expect(expression.get(context)).to.eql({_at: '_page.nums.0'});
+    expect(expression.get(context).path()).to.equal('_page.nums.0');
   });
 
   it('gets scoped model expressions in fn expressions', function() {
     var expression = create('passThrough($at(_page.nums[3]))');
-    expect(expression.get(context)).to.eql({_at: '_page.nums.3'});
+    expect(expression.get(context).path()).to.equal('_page.nums.3');
   });
 
   it('gets a `new` expression without arguments', function() {
@@ -265,6 +271,24 @@ describe('Expression::get', function() {
   it('gets `new` expression on nested path', function() {
     var expression = create('new global.Error()');
     expect(expression.get(context)).to.be.a(Error);
+  });
+
+  // None of these are supported yet, but ideally they would be
+  it.skip('gets method call of the result of an fn expressions', function() {
+    var expression = create('(_page.date).valueOf()');
+    expect(expression.get(context)).to.equal(1000);
+  });
+  it.skip('gets method call of the result of an fn expressions', function() {
+    var expression = create('passThrough(_page.date).valueOf()');
+    expect(expression.get(context)).to.equal(1000);
+  });
+  it.skip('gets method call of the result of a `new` expressions', function() {
+    var expression = create('new Date(1000).valueOf()');
+    expect(expression.get(context)).to.equal(1000);
+  });
+  it.skip('gets method call of a scoped model expression', function() {
+    var expression = create('$at(_page.nums[3]).path()');
+    expect(expression.get(context)).to.equal('_page.nums.3');
   });
 
   it('gets literal values', function() {
