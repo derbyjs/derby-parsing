@@ -62,6 +62,9 @@ controller.model = {
     }
   }
 };
+controller.model.scope = function(path) {
+  return {_at: path};
+};
 var contextMeta = new contexts.ContextMeta({});
 var context = new contexts.Context(contextMeta, controller);
 
@@ -234,6 +237,16 @@ describe('Expression::get', function() {
     var expression2 = create('plus(minus(_page.nums[3], _page.nums[2]), _page.nums[1])');
     expect(expression.get(context)).to.equal(6);
     expect(expression2.get(context)).to.equal(15);
+  });
+
+  it('gets scoped model expressions', function() {
+    var expression = create('$at(_page.nums[0])');
+    expect(expression.get(context)).to.eql({_at: '_page.nums.0'});
+  });
+
+  it('gets scoped model expressions in fn expressions', function() {
+    var expression = create('passThrough($at(_page.nums[3]))');
+    expect(expression.get(context)).to.eql({_at: '_page.nums.3'});
   });
 
   it('gets a `new` expression without arguments', function() {
