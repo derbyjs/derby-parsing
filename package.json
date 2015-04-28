@@ -19,13 +19,13 @@
     "url": "https://github.com/codeparty/derby-parsing/issues"
   },
   "dependencies": {
-    "derby-templates": "^0.2.3",
-    "esprima-derby": "~0.1.0",
-    "html-util": "~0.2.0"
+    "derby-templates": "^0.3.0",
+    "esprima-derby": "^0.1.0",
+    "html-util": "^0.2.0"
   },
   "devDependencies": {
-    "expect.js": "~0.3.1",
-    "jshint": "~2.4.4",
-    "mocha": "~1.17.1"
+    "expect.js": "^0.3.1",
+    "jshint": "^2.4.4",
+    "mocha": "^1.17.1"
   }
 }
