@@ -274,7 +274,7 @@ describe('Expression::get', function() {
   });
 
   // None of these are supported yet, but ideally they would be
-  it.skip('gets method call of the result of an fn expressions', function() {
+  it('gets method call of the result of an fn expressions', function() {
     var expression = create('(_page.date).valueOf()');
     expect(expression.get(context)).to.equal(1000);
   });
