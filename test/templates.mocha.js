@@ -12,6 +12,7 @@ var model = {
     , yep: true
     , nope: false
     , nada: null
+    , objectA: { 'A': 'first', 'B': 'second' }
     , letters: ['A', 'B', 'C']
     , emptyList: []
     , matrix: [[0, 1], [1, 0]]
@@ -455,6 +456,27 @@ describe('View insertion', function() {
       views.register('paragraph', '<p>{{@content}}</p>');
       var view = views.find('body');
       expect(view.get(context)).equal('<div><p><b>Hi</b></p></div>');
+  });
+
+  it('attributes can be used as object index if defined as alias', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body', '<view is="section" attr="{{_page.letters[0]}}"><b>Hi</b></view>');
+    views.register('section', '<div><view is="paragraph" attr="{{@attr}}"></view></div>');
+    views.register('paragraph', '<p>{{with @attr as #attr}}{{_page.objectA[#attr]}}{{/}}</p>');
+    var view = views.find('body');
+    expect(view.get(context)).equal('<div><p>first</p></div>');
+  });
+
+  // This test fails
+  it.skip('attributes can be used as object index', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body', '<view is="section" attr="{{_page.letters[0]}}"><b>Hi</b></view>');
+    views.register('section', '<div><view is="paragraph" attr="{{@attr}}"></view></div>');
+    views.register('paragraph', '<p>{{_page.objectA[@attr]}}</p>');
+    var view = views.find('body');
+    expect(view.get(context)).equal('<div><p>first</p></div>');
     });
   });
 
