@@ -35,6 +35,9 @@ var controller = {
 controller.model = {
   data: {
     key: 'green'
+  , Math: {
+      abs: "not a function"
+    }
   , _page: {
       colors: {
         green: {
@@ -273,11 +276,19 @@ describe('Expression::get', function() {
     expect(expression.get(context)).to.be.a(Error);
   });
 
-  // None of these are supported yet, but ideally they would be
   it('gets method call of the result of an fn expressions', function() {
     var expression = create('(_page.date).valueOf()');
     expect(expression.get(context)).to.equal(1000);
   });
+
+  it('gets the correct method even in case of duplicate paths', function() {
+    var expression = create('Math.abs(-5)');
+    expect(expression.get(context)).to.equal(5);
+    expression = create('Math.abs');
+    expect(expression.get(context)).to.equal('not a function');
+  });
+
+  // None of these are supported yet, but ideally they would be
   it.skip('gets method call of the result of an fn expressions', function() {
     var expression = create('passThrough(_page.date).valueOf()');
     expect(expression.get(context)).to.equal(1000);
