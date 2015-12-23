@@ -63,6 +63,17 @@ describe('Parse and render literal HTML', function() {
     }).to.throwException();
   });
 
+  it('throws on a missing </span> tag', function() {
+    expect(function() {
+      parsing.createTemplate('<span><span></span>');
+    }).to.throwException();
+  });
+
+  it('throws on a missing </div> tag', function() {
+    expect(function() {
+      parsing.createTemplate('<div><div></div>');
+    }).to.throwException();
+  });
 });
 
 describe('Parse and render dynamic text and blocks', function() {
