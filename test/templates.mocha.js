@@ -179,13 +179,19 @@ describe('Parse and render dynamic text and blocks', function() {
     test('{{each _page.letters as #letter, #i}}{{#i + 1}}:{{#letter}};{{/each}}', '1:A;2:B;3:C;');
   });
 
+  it('throws on unclosed block tags', function() {
+    expect(function() {
+      parsing.createTemplate('{{if 1}}');
+    }).to.throwException(/Missing closing tag: \{\{if 1\}\}/);
+  });
+
   it('throws on unopened block tags', function() {
     expect(function() {
       parsing.createTemplate('{{/if}}');
     }).to.throwException(/Mismatched closing template tag: \{\{\/if\}\} has no opening tag/);
   });
 
-  it('throws on unclosed HTML tags', function() {
+  it('throws on unclosed HTML tags in blocks', function() {
     expect(function() {
       parsing.createTemplate('{{if 1}}<div>{{/if}}');
     }).to.throwException(/Mismatched closing template tag: \{\{\/if\}\} does not match opening <div>/);
