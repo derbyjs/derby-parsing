@@ -185,6 +185,12 @@ describe('Parse and render dynamic text and blocks', function() {
     }).to.throwException(/Missing closing tag: \{\{if 1\}\}/);
   });
 
+  it('throws on unclosed block tags with a continuing expression', function() {
+    expect(function() {
+      parsing.createTemplate('{{if 1}}{{else}}');
+    }).to.throwException(/Missing closing tag: \{\{if 1\}\}/);
+  });
+
   it('throws on unopened block tags', function() {
     expect(function() {
       parsing.createTemplate('{{/if}}');
@@ -203,10 +209,28 @@ describe('Parse and render dynamic text and blocks', function() {
     }).to.throwException(/Mismatched closing template tag: \{\{\/each\}\} does not match \{\{if 1\}\}/);
   });
 
-  it('throws on unmatched continuing block expressions', function() {
+  it('throws on unmatched continuing expressions', function() {
     expect(function() {
       parsing.createTemplate('{{else}}');
     }).to.throwException(/Mismatched template tag: \{\{\else\}\} has no opening tag/);
+  });
+
+  it('throws on repeated {{else}} in {{if}}', function() {
+    expect(function() {
+      parsing.createTemplate('{{if 1}}{{else}}{{else}}{{/if}}');
+    }).to.throwException(/Conflicting tag: {{if 1}} already has an \{\{else}\}/);
+  });
+
+  it('throws on {{else if}} after {{else}}', function() {
+    expect(function() {
+      parsing.createTemplate('{{if 1}}{{else}}{{else if 2}}{{/if}}');
+    }).to.throwException(/Conflicting tag: {{if 1}} already has an \{\{else}\}/);
+  });
+
+  it('throws on repeated {{else}} in {{each}}', function() {
+    expect(function() {
+      parsing.createTemplate('{{each [1]}}{{else}}{{else}}{{/if}}');
+    }).to.throwException(/Conflicting tag: {{each \[1\]}} already has an \{\{else}\}/);
   });
 
   it('throws on unmatched continuing block expressions in HTML tags', function() {
