@@ -178,6 +178,24 @@ describe('Parse and render dynamic text and blocks', function() {
   it('index alias to each block', function() {
     test('{{each _page.letters as #letter, #i}}{{#i + 1}}:{{#letter}};{{/each}}', '1:A;2:B;3:C;');
   });
+
+  it('throws on unopened block tags', function() {
+    expect(function() {
+      parsing.createTemplate('{{/if}}');
+    }).to.throwException(/Mismatched closing template tag: \{\{\/if\}\} has no opening tag/);
+  });
+
+  it('throws on unclosed HTML tags', function() {
+    expect(function() {
+      parsing.createTemplate('{{if 1}}<div>{{/if}}');
+    }).to.throwException(/Mismatched closing template tag: \{\{\/if\}\} does not match opening <div>/);
+  });
+
+  it('throws on mismatched block tags', function() {
+    expect(function() {
+      parsing.createTemplate('{{if 1}}{{/each}}');
+    }).to.throwException(/Mismatched closing template tag: \{\{\/each\}\} does not match \{\{if 1\}\}/);
+  });
 });
 
 describe('Parse and render HTML and blocks', function() {
