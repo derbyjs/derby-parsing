@@ -205,8 +205,8 @@ describe('Parse and render dynamic text and blocks', function() {
 
   it('throws on mismatched block tags', function() {
     expect(function() {
-      parsing.createTemplate('{{if 1}}{{/each}}');
-    }).to.throwException(/Mismatched closing template tag: \{\{\/each\}\} does not match \{\{if 1\}\}/);
+      parsing.createTemplate('{{if 1}}{{/unless}}');
+    }).to.throwException(/Mismatched closing template tag: \{\{\/unless\}\} does not match \{\{if 1\}\}/);
   });
 
   it('throws on unmatched continuing expressions', function() {
@@ -225,6 +225,12 @@ describe('Parse and render dynamic text and blocks', function() {
     expect(function() {
       parsing.createTemplate('{{if 1}}{{else}}{{else if 2}}{{/if}}');
     }).to.throwException(/Conflicting tag: {{if 1}} already has an \{\{else}\}/);
+  });
+
+  it('throws on {{else if}} in {{each}}', function() {
+    expect(function() {
+      parsing.createTemplate('{{each [1]}}{{else if 1}}{{/each}}');
+    }).to.throwException(/Conflicting tag: \{\{else if 1\}\} cannot be within \{\{each \[1\]}\}/);
   });
 
   it('throws on repeated {{else}} in {{each}}', function() {
