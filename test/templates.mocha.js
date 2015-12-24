@@ -60,9 +60,20 @@ describe('Parse and render literal HTML', function() {
   it('throws on a mismatched closing HTML tag', function() {
     expect(function() {
       parsing.createTemplate('<div><a></div>');
-    }).to.throwException();
+    }).to.throwException(/Mismatched closing HTML tag: <\/div>/);
   });
 
+  it('throws on a missing </span> tag', function() {
+    expect(function() {
+      parsing.createTemplate('<span><span></span>');
+    }).to.throwException(/Missing closing HTML tag: <\/span>/);
+  });
+
+  it('throws on a missing </div> tag', function() {
+    expect(function() {
+      parsing.createTemplate('<div><div></div>');
+    }).to.throwException(/Missing closing HTML tag: <\/div>/);
+  });
 });
 
 describe('Parse and render dynamic text and blocks', function() {
