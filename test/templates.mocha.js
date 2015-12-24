@@ -60,19 +60,19 @@ describe('Parse and render literal HTML', function() {
   it('throws on no opening HTML tag', function() {
     expect(function() {
       parsing.createTemplate('</div>');
-    }).to.throwException(/Mismatched closing HTML tag: <\/div>/);
+    }).to.throwException(/Missing HTML tag: <\/div> doesn't have an opening tag/);
   });
 
   it('throws on a mismatched closing HTML tag', function() {
     expect(function() {
       parsing.createTemplate('<div><a></div>');
-    }).to.throwException(/Mismatched closing HTML tag: <\/div>/);
+    }).to.throwException(/Mismatched HTML tags: <\/div> doesn't close <a>/);
   });
 
   it('throws on a missing </span> tag', function() {
     expect(function() {
-      parsing.createTemplate('<span><span></span>');
-    }).to.throwException(/Missing closing HTML tag: <\/span>/);
+      parsing.createTemplate('<span><strong></span>');
+    }).to.throwException(/Mismatched HTML tags: <\/span> doesn't close <strong>/);
   });
 
   it('throws on a missing </div> tag', function() {
