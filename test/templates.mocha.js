@@ -57,6 +57,12 @@ describe('Parse and render literal HTML', function() {
     });
   }
 
+  it('throws on no opening HTML tag', function() {
+    expect(function() {
+      parsing.createTemplate('</div>');
+    }).to.throwException(/Mismatched closing HTML tag: <\/div>/);
+  });
+
   it('throws on a mismatched closing HTML tag', function() {
     expect(function() {
       parsing.createTemplate('<div><a></div>');
@@ -183,6 +189,12 @@ describe('Parse and render dynamic text and blocks', function() {
     expect(function() {
       parsing.createTemplate('{{if 1}}');
     }).to.throwException(/Missing closing tag: \{\{if 1\}\}/);
+  });
+
+  it('throws on unclosed block tags in HTML', function() {
+    expect(function() {
+      parsing.createTemplate('<div>{{if 1}}{{else}}</div>');
+    }).to.throwException(/Missing closing tag: \{\{\if 1\}\}/);
   });
 
   it('throws on unclosed block tags with a continuing expression', function() {
