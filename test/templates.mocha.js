@@ -194,13 +194,25 @@ describe('Parse and render dynamic text and blocks', function() {
   it('throws on unclosed HTML tags in blocks', function() {
     expect(function() {
       parsing.createTemplate('{{if 1}}<div>{{/if}}');
-    }).to.throwException(/Mismatched closing template tag: \{\{\/if\}\} does not match opening <div>/);
+    }).to.throwException(/Mismatched closing template tag: \{\{\/if\}\} does not match <div>/);
   });
 
   it('throws on mismatched block tags', function() {
     expect(function() {
       parsing.createTemplate('{{if 1}}{{/each}}');
     }).to.throwException(/Mismatched closing template tag: \{\{\/each\}\} does not match \{\{if 1\}\}/);
+  });
+
+  it('throws on unmatched continuing block expressions', function() {
+    expect(function() {
+      parsing.createTemplate('{{else}}');
+    }).to.throwException(/Mismatched template tag: \{\{\else\}\} has no opening tag/);
+  });
+
+  it('throws on unmatched continuing block expressions in HTML tags', function() {
+    expect(function() {
+      parsing.createTemplate('<div>{{else}}</div>');
+    }).to.throwException(/Mismatched template tag: \{\{\else\}\} does not match <div>/);
   });
 });
 
