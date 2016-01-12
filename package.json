@@ -13,7 +13,7 @@
   "keywords": [
     "derby"
   ],
-  "author": "",
+  "author": "Nate Smith",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/derbyjs/derby-parsing/issues"
@@ -27,5 +27,9 @@
     "expect.js": "^0.3.1",
     "jshint": "^2.4.4",
     "mocha": "^1.17.1"
+  },
+  "homepage": "https://github.com/derbyjs/derby-parsing#readme",
+  "directories": {
+    "test": "test"
   }
 }
