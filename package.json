@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/codeparty/derby-parsing.git"
+    "url": "git://github.com/derbyjs/derby-parsing.git"
   },
   "keywords": [
     "derby"
@@ -16,7 +16,7 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/codeparty/derby-parsing/issues"
+    "url": "https://github.com/derbyjs/derby-parsing/issues"
   },
   "dependencies": {
     "derby-templates": "^0.3.3",
