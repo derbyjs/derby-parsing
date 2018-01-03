@@ -16,7 +16,7 @@ var model = {
     , emptyList: []
     , matrix: [[0, 1], [1, 0]]
     , view: 'section'
-    , html: '<b>Qua?</b>'
+    , html: '<b class="foo">Qua?</b>'
     , tag: 'strong'
     }
   }
@@ -191,7 +191,7 @@ describe('Parse and render HTML and blocks', function() {
   });
 
   it('unescaped HTML', function() {
-    test('<div>{{unescaped _page.html}}</div>', '<div><b>Qua?</b></div>');
+    test('<div>{{unescaped _page.html}}</div>', '<div><b class="foo">Qua?</b></div>');
   });
 
   it('dynamic element', function() {
@@ -570,6 +570,59 @@ describe('View insertion', function() {
         '<tr><td>Text: item BB</td><td>Length: 7</td></tr>' +
       '</table>'
     );
+
+  it('HTML content escapes a literal view attribute', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body', '<view is="partial" text="<b>Hi</b>"></view>');
+    views.register('partial', '{{@text}}');
+    var view = views.find('body');
+    expect(view.get(context)).equal('&lt;b>Hi&lt;/b>');
+  });
+
+  it('HTML content escapes a path expression view attribute', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body', '<view is="partial" text="{{_page.html}}"></view>');
+    views.register('partial', '{{@text}}');
+    var view = views.find('body');
+    expect(view.get(context)).equal('&lt;b class="foo">Qua?&lt;/b>');
+  });
+
+  it('HTML content escapes a complex template view attribute', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body', '<view is="partial" text="{{_page.html}} bar"></view>');
+    views.register('partial', '{{@text}}');
+    var view = views.find('body');
+    expect(view.get(context)).equal('&lt;b class="foo">Qua?&lt;/b> bar');
+  });
+
+  it('HTML attribute escapes a literal view attribute', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body', '<view is="partial" text="<b class=&quot;foo&quot;>Hi</b>"></view>');
+    views.register('partial', '<div data-text="{{@text}}"></div>');
+    var view = views.find('body');
+    expect(view.get(context)).equal('<div data-text="<b class=&quot;foo&quot;>Hi</b>"></div>');
+  });
+
+  it('HTML attribute escapes a path expression view attribute', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body', '<view is="partial" text="{{_page.html}}"></view>');
+    views.register('partial', '<div data-text="{{@text}}"></div>');
+    var view = views.find('body');
+    expect(view.get(context)).equal('<div data-text="<b class=&quot;foo&quot;>Qua?</b>"></div>');
+  });
+
+  it('HTML attribute escapes a complex template view attribute', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body', '<view is="partial" text="{{_page.html}} bar"></view>');
+    views.register('partial', '<div data-text="{{@text}}"></div>');
+    var view = views.find('body');
+    expect(view.get(context)).equal('<div data-text="<b class=&quot;foo&quot;>Qua?</b> bar"></div>');
   });
 
 });
