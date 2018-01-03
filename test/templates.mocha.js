@@ -570,6 +570,7 @@ describe('View insertion', function() {
         '<tr><td>Text: item BB</td><td>Length: 7</td></tr>' +
       '</table>'
     );
+  });
 
   it('HTML content escapes a literal view attribute', function() {
     var views = new templates.Views();
