@@ -522,6 +522,55 @@ describe('View insertion', function() {
     );
   });
 
+  it('view usage supports "within" attribute on child tags to use context from inside view', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body'
+    , '<view is="custom-list" items="{{[\'item A\', \'item B\']}}">' +
+        '<item-content within><b>{{#item}}</b></item-content>' +
+      '</view>'
+    );
+    views.register('custom-list'
+    , '<ul>' +
+        '{{each @items as #item}}' +
+          '<li>{{@itemContent}}</li>' +
+        '{{/each}}' +
+      '</ul>'
+    , {attributes: 'item-content'}
+    );
+    var view = views.find('body');
+    expect(view.get(context)).equal('<ul><li><b>item A</b></li><li><b>item B</b></li></ul>');
+  });
+
+  it('view usage supports "within" attribute on child array tags to use context from inside view', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body'
+    , '<view is="custom-table" items="{{[\'item A\', \'item BB\']}}">' +
+        '<row-cell within>Text: {{#item}}</row-cell>' +
+        '<row-cell within>Length: {{#item.length}}</row-cell>' +
+      '</view>'
+    );
+    views.register('custom-table'
+    , '<table>' +
+        '{{each @items as #item}}' +
+          '<tr>' +
+            '{{each @rowCells as #rowCell}}' +
+              '<td>{{#rowCell.content}}</td>' +
+            '{{/each}}' +
+          '</tr>' +
+        '{{/each}}' +
+      '</table>'
+    , {arrays: 'row-cell/rowCells'}
+    );
+    var view = views.find('body');
+    expect(view.get(context)).equal(
+      '<table>' +
+        '<tr><td>Text: item A</td><td>Length: 6</td></tr>' +
+        '<tr><td>Text: item BB</td><td>Length: 7</td></tr>' +
+      '</table>'
+    );
+
   it('HTML content escapes a literal view attribute', function() {
     var views = new templates.Views();
     context.meta.views = views;
