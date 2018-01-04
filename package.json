@@ -19,7 +19,7 @@
     "url": "https://github.com/derbyjs/derby-parsing/issues"
   },
   "dependencies": {
-    "derby-templates": "^0.4.0",
+    "derby-templates": "^0.5.0",
     "esprima-derby": "^0.1.0",
     "html-util": "^0.2.0"
   },
