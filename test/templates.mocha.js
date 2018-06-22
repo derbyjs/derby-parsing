@@ -245,12 +245,14 @@ describe('Parse and render HTML and blocks', function() {
 
 describe('View insertion', function() {
 
-  it('can register and find a view', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<div></div>');
-    var view = views.find('body');
-    expect(view.get(context)).equal('<div></div>');
+  describe('find', function() {
+    it('can register and find a view', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body', '<div></div>');
+      var view = views.find('body');
+      expect(view.get(context)).equal('<div></div>');
+    });
   });
 
   describe('inserts a literal view', function() {
@@ -333,347 +335,351 @@ describe('View insertion', function() {
     test('<view is="section" text="{{_page.greeting}}" />');
   });
 
-  it('passes HTML inside <view> as {{@content}}', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<view is="section"><b>Hi</b></view>');
-    views.register('section', '<div>{{@content}}</div>');
-    var view = views.find('body');
-    expect(view.get(context)).equal('<div><b>Hi</b></div>');
+  describe('content attribute', function() {
+    it('passes HTML inside <view> as {{@content}}', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body', '<view is="section"><b>Hi</b></view>');
+      views.register('section', '<div>{{@content}}</div>');
+      var view = views.find('body');
+      expect(view.get(context)).equal('<div><b>Hi</b></div>');
+    });
+
+    it('can be overridden', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body', '<view is="section" content="Stuff"><b>Hi</b></view>');
+      views.register('section', '<div>{{@content}}</div>');
+      var view = views.find('body');
+      expect(view.get(context)).equal('<div>Stuff</div>');
+    });
+
+    it('can pass through parent content', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body', '<view is="section"><b>Hi</b></view>');
+      views.register('section', '<div><view is="paragraph" content="{{@content}}"></view></div>');
+      views.register('paragraph', '<p>{{@content}}</p>');
+      var view = views.find('body');
+      expect(view.get(context)).equal('<div><p><b>Hi</b></p></div>');
+    });
   });
 
-  it('content can be overridden', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<view is="section" content="Stuff"><b>Hi</b></view>');
-    views.register('section', '<div>{{@content}}</div>');
-    var view = views.find('body');
-    expect(view.get(context)).equal('<div>Stuff</div>');
+  describe('attribute tag', function() {
+    it('can be defined as an option of a view', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body'
+      , '<view is="section">' +
+          '<title><b>Hi</b></title>' +
+          'More text' +
+        '</view>'
+      );
+      views.register('section'
+      , '<h3>{{@title}}</h3>' +
+        '<div>{{@content}}</div>'
+      , {attributes: 'title'}
+      );
+      var view = views.find('body');
+      expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
+    });
+
+    it('translates dashed tag name into camel-cased attribute name', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body'
+      , '<view is="section">' +
+          '<main-title><b>Hi</b></main-title>' +
+          'More text' +
+        '</view>'
+      );
+      views.register('section'
+      , '<h3>{{@mainTitle}}</h3>' +
+        '<div>{{@content}}</div>'
+      , {attributes: 'main-title'}
+      );
+      var view = views.find('body');
+      expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
+    });
+
+    it('can be dynamically defined with a generic attribute tag', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body'
+      , '<view is="section">' +
+          '<attribute is="title"><b>Hi</b></attribute>' +
+          'More text' +
+        '</view>'
+      );
+      views.register('section'
+      , '<h3>{{@title}}</h3>' +
+        '<div>{{@content}}</div>'
+      );
+      var view = views.find('body');
+      expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
+    });
   });
 
-  it('parent content can be passed through', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<view is="section"><b>Hi</b></view>');
-    views.register('section', '<div><view is="paragraph" content="{{@content}}"></view></div>');
-    views.register('paragraph', '<p>{{@content}}</p>');
-    var view = views.find('body');
-    expect(view.get(context)).equal('<div><p><b>Hi</b></p></div>');
-  });
-
-  it('views can define custom child attribute tags', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<view is="section"><title><b>Hi</b></title>More text</view>');
-    views.register('section', '<h3>{{@title}}</h3><div>{{@content}}</div>', {attributes: 'title'});
-    var view = views.find('body');
-    expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
-  });
-
-  it('views can define custom child attribute tags', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body'
-    , '<view is="section">' +
-        '<title><b>Hi</b></title>' +
-        'More text' +
-      '</view>'
-    );
-    views.register('section'
-    , '<h3>{{@title}}</h3>' +
-      '<div>{{@content}}</div>'
-    , {attributes: 'title'}
-    );
-    var view = views.find('body');
-    expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
-  });
-
-  it('views can define custom child attribute tags with dashes', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body'
-    , '<view is="section">' +
-        '<main-title><b>Hi</b></main-title>' +
-        'More text' +
-      '</view>'
-    );
-    views.register('section'
-    , '<h3>{{@mainTitle}}</h3>' +
-      '<div>{{@content}}</div>'
-    , {attributes: 'main-title'}
-    );
-    var view = views.find('body');
-    expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
-  });
-
-  it('views support generic attribute tags', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body'
-    , '<view is="section">' +
-        '<attribute is="title"><b>Hi</b></attribute>' +
-        'More text' +
-      '</view>'
-    );
-    views.register('section'
-    , '<h3>{{@title}}</h3>' +
-      '<div>{{@content}}</div>'
-    );
-    var view = views.find('body');
-    expect(view.get(context)).equal('<h3><b>Hi</b></h3><div>More text</div>');
-  });
-
-  it('views can define custom child array tags', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body'
-    , '<view is="tabs">' +
-        '<pane title="One"><b>Hi</b></pane>' +
-        '<pane title="Two">Ho</pane>' +
-      '</view>'
-    );
-    views.register('tabs'
-    , '<ul>' +
-        '{{each @panes}}' +
-          '<li>{{this.title}}</li>' +
-        '{{/each}}' +
-      '</ul>' +
-      '{{each @panes}}' +
-        '<div>{{this.content}}</div>' +
-      '{{/each}}'
-    , {arrays: 'pane/panes'}
-    );
-    var view = views.find('body');
-    expect(view.get(context)).equal(
-      '<ul>' +
-        '<li>One</li>' +
-        '<li>Two</li>' +
-      '</ul>' +
-      '<div><b>Hi</b></div>' +
-      '<div>Ho</div>'
-    );
-  });
-
-  it('views support generic array tags', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body'
-    , '<view is="tabs">' +
-        '<array is="panes" title="One"><b>Hi</b></array>' +
-        '<array is="panes" title="Two">Ho</array>' +
-      '</view>'
-    );
-    views.register('tabs'
-    , '<ul>' +
-        '{{each @panes}}' +
-          '<li>{{this.title}}</li>' +
-        '{{/each}}' +
-      '</ul>' +
-      '{{each @panes}}' +
-        '<div>{{this.content}}</div>' +
-      '{{/each}}'
-    );
-    var view = views.find('body');
-    expect(view.get(context)).equal(
-      '<ul>' +
-        '<li>One</li>' +
-        '<li>Two</li>' +
-      '</ul>' +
-      '<div><b>Hi</b></div>' +
-      '<div>Ho</div>'
-    );
-  });
-
-  it('view array tags can pass in expression values', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body'
-    , '<view is="tabs">' +
-        '<pane title="{{_page.greeting}}">{{_page.letters[0]}}</pane>' +
-        '<pane title="{{\'Hi\'}}">{{33}}</pane>' +
-      '</view>'
-    );
-    views.register('tabs'
-    , '<ul>' +
-        '{{each @panes as #pane}}' +
-          '<li>{{#pane.title}}</li>' +
-        '{{/each}}' +
-      '</ul>' +
-      '{{each @panes as #pane}}' +
-        '<div>{{#pane.content}}</div>' +
-      '{{/each}}'
-    , {arrays: 'pane/panes'}
-    );
-    var view = views.find('body');
-    expect(view.get(context)).equal(
-      '<ul>' +
-        '<li>Howdy!</li>' +
-        '<li>Hi</li>' +
-      '</ul>' +
-      '<div>A</div>' +
-      '<div>33</div>'
-    );
-  });
-
-  it('expression values in array tags are rendered before passing to view functions', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body'
-    , '<view is="tabs">' +
-        '<pane title="{{_page.greeting}}">{{_page.letters[0]}}</pane>' +
-        '<pane title="{{\'Hi\'}}">{{33}}</pane>' +
-      '</view>'
-    );
-    views.register('tabs', '{{JSON.stringify(@panes)}}', {arrays: 'pane/panes'});
-    var view = views.find('body');
-    expect(view.get(context)).equal(
-      '[' +
-        '{"title":"Howdy!","content":"A"},' +
-        '{"title":"Hi","content":33}' +
-      ']'
-    );
-  });
-
-  it('views inside an each pass through alias context', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body'
-    , '<ol>' +
-        '{{each _page.matrix as #row}}' +
-          '<view is="row"></view>' +
-        '{{/each}}' +
-      '</ol>'
-    );
-    views.register('row'
-    , '<li>' +
-        '<ol>' +
-          '{{each #row as #item}}' +
-            '<li>{{#item}}</li>' +
+  describe('array tag', function() {
+    it('can be defined as an option of a view', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body'
+      , '<view is="tabs">' +
+          '<pane title="One"><b>Hi</b></pane>' +
+          '<pane title="Two">Ho</pane>' +
+        '</view>'
+      );
+      views.register('tabs'
+      , '<ul>' +
+          '{{each @panes}}' +
+            '<li>{{this.title}}</li>' +
           '{{/each}}' +
-        '</ol>' +
-      '</li>'
-    );
-    var view = views.find('body');
-    expect(view.get(context)).equal(
-      '<ol>' +
-        '<li>' +
-          '<ol>' +
-            '<li>0</li>' +
-            '<li>1</li>' +
-          '</ol>' +
-        '</li>' +
-        '<li>' +
-          '<ol>' +
-            '<li>1</li>' +
-            '<li>0</li>' +
-          '</ol>' +
-        '</li>' +
-      '</ol>'
-    );
+        '</ul>' +
+        '{{each @panes}}' +
+          '<div>{{this.content}}</div>' +
+        '{{/each}}'
+      , {arrays: 'pane/panes'}
+      );
+      var view = views.find('body');
+      expect(view.get(context)).equal(
+        '<ul>' +
+          '<li>One</li>' +
+          '<li>Two</li>' +
+        '</ul>' +
+        '<div><b>Hi</b></div>' +
+        '<div>Ho</div>'
+      );
+    });
+
+    it('can be dynamically defined with generic array tags', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body'
+      , '<view is="tabs">' +
+          '<array is="panes" title="One"><b>Hi</b></array>' +
+          '<array is="panes" title="Two">Ho</array>' +
+        '</view>'
+      );
+      views.register('tabs'
+      , '<ul>' +
+          '{{each @panes}}' +
+            '<li>{{this.title}}</li>' +
+          '{{/each}}' +
+        '</ul>' +
+        '{{each @panes}}' +
+          '<div>{{this.content}}</div>' +
+        '{{/each}}'
+      );
+      var view = views.find('body');
+      expect(view.get(context)).equal(
+        '<ul>' +
+          '<li>One</li>' +
+          '<li>Two</li>' +
+        '</ul>' +
+        '<div><b>Hi</b></div>' +
+        '<div>Ho</div>'
+      );
+    });
+
+    it('passes in expression values', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body'
+      , '<view is="tabs">' +
+          '<pane title="{{_page.greeting}}">{{_page.letters[0]}}</pane>' +
+          '<pane title="{{\'Hi\'}}">{{33}}</pane>' +
+        '</view>'
+      );
+      views.register('tabs'
+      , '<ul>' +
+          '{{each @panes as #pane}}' +
+            '<li>{{#pane.title}}</li>' +
+          '{{/each}}' +
+        '</ul>' +
+        '{{each @panes as #pane}}' +
+          '<div>{{#pane.content}}</div>' +
+        '{{/each}}'
+      , {arrays: 'pane/panes'}
+      );
+      var view = views.find('body');
+      expect(view.get(context)).equal(
+        '<ul>' +
+          '<li>Howdy!</li>' +
+          '<li>Hi</li>' +
+        '</ul>' +
+        '<div>A</div>' +
+        '<div>33</div>'
+      );
+    });
+
+    it('is rendered before passing to view functions', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body'
+      , '<view is="tabs">' +
+          '<pane title="{{_page.greeting}}">{{_page.letters[0]}}</pane>' +
+          '<pane title="{{\'Hi\'}}">{{33}}</pane>' +
+        '</view>'
+      );
+      views.register('tabs', '{{JSON.stringify(@panes)}}', {arrays: 'pane/panes'});
+      var view = views.find('body');
+      expect(view.get(context)).equal(
+        '[' +
+          '{"title":"Howdy!","content":"A"},' +
+          '{"title":"Hi","content":33}' +
+        ']'
+      );
+    });
   });
 
-  it('view usage supports "within" attribute on child tags to use context from inside view', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body'
-    , '<view is="custom-list" items="{{[\'item A\', \'item B\']}}">' +
-        '<item-content within><b>{{#item}}</b></item-content>' +
-      '</view>'
-    );
-    views.register('custom-list'
-    , '<ul>' +
-        '{{each @items as #item}}' +
-          '<li>{{@itemContent}}</li>' +
-        '{{/each}}' +
-      '</ul>'
-    , {attributes: 'item-content'}
-    );
-    var view = views.find('body');
-    expect(view.get(context)).equal('<ul><li><b>item A</b></li><li><b>item B</b></li></ul>');
+  describe('within attribute', function() {
+    it('supports "within" attribute on child tags to use context from inside view', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body'
+      , '<view is="custom-list" items="{{[\'item A\', \'item B\']}}">' +
+          '<item-content within><b>{{#item}}</b></item-content>' +
+        '</view>'
+      );
+      views.register('custom-list'
+      , '<ul>' +
+          '{{each @items as #item}}' +
+            '<li>{{@itemContent}}</li>' +
+          '{{/each}}' +
+        '</ul>'
+      , {attributes: 'item-content'}
+      );
+      var view = views.find('body');
+      expect(view.get(context)).equal('<ul><li><b>item A</b></li><li><b>item B</b></li></ul>');
+    });
+
+    it('supports "within" attribute on child array tags to use context from inside view', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body'
+      , '<view is="custom-table" items="{{[\'item A\', \'item BB\']}}">' +
+          '<row-cell within>Text: {{#item}}</row-cell>' +
+          '<row-cell within>Length: {{#item.length}}</row-cell>' +
+        '</view>'
+      );
+      views.register('custom-table'
+      , '<table>' +
+          '{{each @items as #item}}' +
+            '<tr>' +
+              '{{each @rowCells as #rowCell}}' +
+                '<td>{{#rowCell.content}}</td>' +
+              '{{/each}}' +
+            '</tr>' +
+          '{{/each}}' +
+        '</table>'
+      , {arrays: 'row-cell/rowCells'}
+      );
+      var view = views.find('body');
+      expect(view.get(context)).equal(
+        '<table>' +
+          '<tr><td>Text: item A</td><td>Length: 6</td></tr>' +
+          '<tr><td>Text: item BB</td><td>Length: 7</td></tr>' +
+        '</table>'
+      );
+    });
   });
 
-  it('view usage supports "within" attribute on child array tags to use context from inside view', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body'
-    , '<view is="custom-table" items="{{[\'item A\', \'item BB\']}}">' +
-        '<row-cell within>Text: {{#item}}</row-cell>' +
-        '<row-cell within>Length: {{#item.length}}</row-cell>' +
-      '</view>'
-    );
-    views.register('custom-table'
-    , '<table>' +
-        '{{each @items as #item}}' +
-          '<tr>' +
-            '{{each @rowCells as #rowCell}}' +
-              '<td>{{#rowCell.content}}</td>' +
+  describe('HTML content', function() {
+    it('escapes a literal view attribute', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body', '<view is="partial" text="<b>Hi</b>"></view>');
+      views.register('partial', '{{@text}}');
+      var view = views.find('body');
+      expect(view.get(context)).equal('&lt;b>Hi&lt;/b>');
+    });
+
+    it('escapes a path expression view attribute', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body', '<view is="partial" text="{{_page.html}}"></view>');
+      views.register('partial', '{{@text}}');
+      var view = views.find('body');
+      expect(view.get(context)).equal('&lt;b class="foo">Qua?&lt;/b>');
+    });
+
+    it('escapes a complex template view attribute', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body', '<view is="partial" text="{{_page.html}} bar"></view>');
+      views.register('partial', '{{@text}}');
+      var view = views.find('body');
+      expect(view.get(context)).equal('&lt;b class="foo">Qua?&lt;/b> bar');
+    });
+  });
+
+  describe('HTML attribute', function() {
+    it('escapes a literal view attribute', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body', '<view is="partial" text="<b class=&quot;foo&quot;>Hi</b>"></view>');
+      views.register('partial', '<div data-text="{{@text}}"></div>');
+      var view = views.find('body');
+      expect(view.get(context)).equal('<div data-text="<b class=&quot;foo&quot;>Hi</b>"></div>');
+    });
+
+    it('escapes a path expression view attribute', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body', '<view is="partial" text="{{_page.html}}"></view>');
+      views.register('partial', '<div data-text="{{@text}}"></div>');
+      var view = views.find('body');
+      expect(view.get(context)).equal('<div data-text="<b class=&quot;foo&quot;>Qua?</b>"></div>');
+    });
+
+    it('escapes a complex template view attribute', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body', '<view is="partial" text="{{_page.html}} bar"></view>');
+      views.register('partial', '<div data-text="{{@text}}"></div>');
+      var view = views.find('body');
+      expect(view.get(context)).equal('<div data-text="<b class=&quot;foo&quot;>Qua?</b> bar"></div>');
+    });
+  });
+
+  describe('alias from outside view', function() {
+    it('gets each context', function() {
+      var views = new templates.Views();
+      context.meta.views = views;
+      views.register('body'
+      , '<ol>' +
+          '{{each _page.matrix as #row}}' +
+            '<view is="row"></view>' +
+          '{{/each}}' +
+        '</ol>'
+      );
+      views.register('row'
+      , '<li>' +
+          '<ol>' +
+            '{{each #row as #item}}' +
+              '<li>{{#item}}</li>' +
             '{{/each}}' +
-          '</tr>' +
-        '{{/each}}' +
-      '</table>'
-    , {arrays: 'row-cell/rowCells'}
-    );
-    var view = views.find('body');
-    expect(view.get(context)).equal(
-      '<table>' +
-        '<tr><td>Text: item A</td><td>Length: 6</td></tr>' +
-        '<tr><td>Text: item BB</td><td>Length: 7</td></tr>' +
-      '</table>'
-    );
+          '</ol>' +
+        '</li>'
+      );
+      var view = views.find('body');
+      expect(view.get(context)).equal(
+        '<ol>' +
+          '<li>' +
+            '<ol>' +
+              '<li>0</li>' +
+              '<li>1</li>' +
+            '</ol>' +
+          '</li>' +
+          '<li>' +
+            '<ol>' +
+              '<li>1</li>' +
+              '<li>0</li>' +
+            '</ol>' +
+          '</li>' +
+        '</ol>'
+      );
+    });
   });
-
-  it('HTML content escapes a literal view attribute', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<view is="partial" text="<b>Hi</b>"></view>');
-    views.register('partial', '{{@text}}');
-    var view = views.find('body');
-    expect(view.get(context)).equal('&lt;b>Hi&lt;/b>');
-  });
-
-  it('HTML content escapes a path expression view attribute', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<view is="partial" text="{{_page.html}}"></view>');
-    views.register('partial', '{{@text}}');
-    var view = views.find('body');
-    expect(view.get(context)).equal('&lt;b class="foo">Qua?&lt;/b>');
-  });
-
-  it('HTML content escapes a complex template view attribute', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<view is="partial" text="{{_page.html}} bar"></view>');
-    views.register('partial', '{{@text}}');
-    var view = views.find('body');
-    expect(view.get(context)).equal('&lt;b class="foo">Qua?&lt;/b> bar');
-  });
-
-  it('HTML attribute escapes a literal view attribute', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<view is="partial" text="<b class=&quot;foo&quot;>Hi</b>"></view>');
-    views.register('partial', '<div data-text="{{@text}}"></div>');
-    var view = views.find('body');
-    expect(view.get(context)).equal('<div data-text="<b class=&quot;foo&quot;>Hi</b>"></div>');
-  });
-
-  it('HTML attribute escapes a path expression view attribute', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<view is="partial" text="{{_page.html}}"></view>');
-    views.register('partial', '<div data-text="{{@text}}"></div>');
-    var view = views.find('body');
-    expect(view.get(context)).equal('<div data-text="<b class=&quot;foo&quot;>Qua?</b>"></div>');
-  });
-
-  it('HTML attribute escapes a complex template view attribute', function() {
-    var views = new templates.Views();
-    context.meta.views = views;
-    views.register('body', '<view is="partial" text="{{_page.html}} bar"></view>');
-    views.register('partial', '<div data-text="{{@text}}"></div>');
-    var view = views.find('body');
-    expect(view.get(context)).equal('<div data-text="<b class=&quot;foo&quot;>Qua?</b> bar"></div>');
-  });
-
 });
