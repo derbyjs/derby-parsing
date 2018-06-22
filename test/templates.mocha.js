@@ -484,6 +484,56 @@ describe('View insertion', function() {
     );
   });
 
+  it('view array tags can pass in expression values', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body'
+    , '<view is="tabs">' +
+        '<pane title="{{_page.greeting}}">{{_page.letters[0]}}</pane>' +
+        '<pane title="{{\'Hi\'}}">{{33}}</pane>' +
+      '</view>'
+    );
+    views.register('tabs'
+    , '<ul>' +
+        '{{each @panes as #pane}}' +
+          '<li>{{#pane.title}}</li>' +
+        '{{/each}}' +
+      '</ul>' +
+      '{{each @panes as #pane}}' +
+        '<div>{{#pane.content}}</div>' +
+      '{{/each}}'
+    , {arrays: 'pane/panes'}
+    );
+    var view = views.find('body');
+    expect(view.get(context)).equal(
+      '<ul>' +
+        '<li>Howdy!</li>' +
+        '<li>Hi</li>' +
+      '</ul>' +
+      '<div>A</div>' +
+      '<div>33</div>'
+    );
+  });
+
+  it('expression values in array tags are rendered before passing to view functions', function() {
+    var views = new templates.Views();
+    context.meta.views = views;
+    views.register('body'
+    , '<view is="tabs">' +
+        '<pane title="{{_page.greeting}}">{{_page.letters[0]}}</pane>' +
+        '<pane title="{{\'Hi\'}}">{{33}}</pane>' +
+      '</view>'
+    );
+    views.register('tabs', '{{JSON.stringify(@panes)}}', {arrays: 'pane/panes'});
+    var view = views.find('body');
+    expect(view.get(context)).equal(
+      '[' +
+        '{"title":"Howdy!","content":"A"},' +
+        '{"title":"Hi","content":33}' +
+      ']'
+    );
+  });
+
   it('views inside an each pass through alias context', function() {
     var views = new templates.Views();
     context.meta.views = views;
