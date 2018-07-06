@@ -80,6 +80,20 @@ var contextMeta = new contexts.ContextMeta({views: views});
 var context = new contexts.Context(contextMeta, controller);
 var view = new templates.View();
 
+function stripContexts(dependencies) {
+  if (!dependencies) return dependencies;
+  for (var i = 0; i < dependencies.length; i++) {
+    var dependency = dependencies[i];
+    for (var j = 0; j < dependency.length; j++) {
+      var segment = dependency[j];
+      if (segment instanceof contexts.Context) {
+        dependency[j] = {item: segment.item};
+      }
+    }
+  }
+  return dependencies;
+}
+
 describe('template dependencies', function() {
   describe('text', function() {
     it('gets dependencies', function() {
@@ -122,6 +136,43 @@ describe('template dependencies', function() {
         ['_page', 'variation']
       ]);
       expect(template.get(context)).to.equal('light');
+    });
+  });
+
+  describe('each block', function() {
+    it('gets item alias dependencies', function() {
+      var template = createTemplate(
+        '{{each _page.keys as #key}}' +
+          '{{#key}}' +
+        '{{/each}}');
+      expect(stripContexts(template.dependencies(context))).to.eql([
+        ['_page', 'keys'],
+        ['_page', 'keys', {item: 0}],
+        ['_page', 'keys', {item: 1}]
+      ]);
+      expect(template.get(context)).to.equal('redgreen');
+    });
+
+    it('gets index alias dependencies', function() {
+      var template = createTemplate(
+        '{{each _page.keys as #key, #i}}' +
+          '{{#i}}.' +
+        '{{/each}}');
+      expect(stripContexts(template.dependencies(context))).to.eql([
+        ['_page', 'keys'],
+        ['_page', 'keys'],
+        ['_page', 'keys'],
+      ]);
+      expect(template.get(context)).to.equal('0.1.');
+    });
+
+    it('gets alias dependencies from a literal', function() {
+      var template = createTemplate(
+        '{{each [33, 77] as #key, #i}}' +
+          '{{#i}},{{#key}};' +
+        '{{/each}}');
+      expect(stripContexts(template.dependencies(context))).to.eql(undefined);
+      expect(template.get(context)).to.equal('0,33;1,77;');
     });
   });
 
