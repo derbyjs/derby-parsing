@@ -397,7 +397,7 @@ describe('expression dependencies', function() {
           ['_page', 'colors', 'green', 'name'],
           ['lightTemplate']
         ]);
-        expect(expression.get(blockContext)).to.eql('light Green');
+        expect(expression.get(blockContext)).a(templates.Template);
       });
 
       it('gets subpath from template in model dependencies', function() {
@@ -468,7 +468,7 @@ describe('expression dependencies', function() {
           ['_page', 'colors', 'green', 'name'],
           ['lightTemplate']
         ]);
-        expect(expression.get(blockContext)).to.eql('light Green');
+        expect(expression.get(blockContext)).a(templates.Template);
       });
 
       it('gets subpath from template in model dependencies', function() {
@@ -598,32 +598,28 @@ describe('expression dependencies', function() {
     });
 
     describe('template values', function() {
-      // TODO: We aren't testing the returned value from get for comparision.
-      // Currently templates are not rendered when returned from attribute
-      // expressions in particular. Perhaps this should change for
-      // consistency, but right now derby relies on it working this way when
-      // it sets the value of attributes on the model for a component
-
       it('gets function template attribute dependencies', function() {
         var attributes = {
-          color: createTemplate('{{passThrough(_page.colors.green)}}')
+          color: createTemplate('light{{_page.colors.green.name}}')
         };
         var viewContext = context.viewChild(view, attributes);
         var expression = createExpression('@color');
         expect(expression.dependencies(viewContext)).to.eql([
-          ['_page', 'colors', 'green', '*']
+          ['_page', 'colors', 'green', 'name']
         ]);
+        expect(expression.get(viewContext)).a(templates.Template);
       });
 
       it('gets subpath from function template attribute dependencies', function() {
         var attributes = {
-          color: createTemplate('{{passThrough(_page.colors.green)}}')
+          color: createTemplate('light{{_page.colors.green.name}}')
         };
         var viewContext = context.viewChild(view, attributes);
-        var expression = createExpression('@color.name');
+        var expression = createExpression('@color.length');
         expect(expression.dependencies(viewContext)).to.eql([
-          ['_page', 'colors', 'green', '*']
+          ['_page', 'colors', 'green', 'name']
         ]);
+        expect(expression.get(viewContext)).equal(10);
       });
 
       it('gets template in model attribute dependencies', function() {
@@ -637,6 +633,7 @@ describe('expression dependencies', function() {
           ['_page', 'colors', 'green', 'name'],
           ['lightTemplate']
         ]);
+        expect(expression.get(viewContext)).a(templates.Template);
       });
 
       it('gets subpath from template in model attribute dependencies', function() {
@@ -650,6 +647,7 @@ describe('expression dependencies', function() {
           ['_page', 'colors', 'green', 'name'],
           ['lightTemplate', 'length']
         ]);
+        expect(expression.get(viewContext)).equal(11);
       });
     });
   });
