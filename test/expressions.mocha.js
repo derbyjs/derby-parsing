@@ -278,15 +278,15 @@ describe('Expression::get', function() {
     var expression = create('(_page.date).valueOf()');
     expect(expression.get(context)).to.equal(1000);
   });
-  it.skip('gets method call of the result of an fn expressions', function() {
+  it('gets method call of the result of an fn expressions', function() {
     var expression = create('passThrough(_page.date).valueOf()');
     expect(expression.get(context)).to.equal(1000);
   });
-  it.skip('gets method call of the result of a `new` expressions', function() {
+  it('gets method call of the result of a `new` expressions', function() {
     var expression = create('new Date(1000).valueOf()');
     expect(expression.get(context)).to.equal(1000);
   });
-  it.skip('gets method call of a scoped model expression', function() {
+  it('gets method call of a scoped model expression', function() {
     var expression = create('$at(_page.nums[3]).path()');
     expect(expression.get(context)).to.equal('_page.nums.3');
   });
