@@ -59,10 +59,13 @@ controller.model = {
     , variationHex: 'light.hex'
     , keys: ['red', 'green']
     , index: 1
+    , tagName: 'div'
+    , html: '<div>Hi</div>'
 
     , nums: [2, 11, 3, 7]
     , first: 2
     , second: 3
+    , year: 2018
     , date: new Date(1000)
     }
   }
@@ -98,7 +101,7 @@ describe('template dependencies', function() {
   describe('text', function() {
     it('gets dependencies', function() {
       var template = createTemplate('Hi');
-      expect(template.dependencies(context)).to.equal(undefined);
+      expect(template.dependencies(context)).to.be.null;
       expect(template.get(context)).to.equal('Hi');
     });
   });
@@ -171,16 +174,106 @@ describe('template dependencies', function() {
         '{{each [33, 77] as #key, #i}}' +
           '{{#i}},{{#key}};' +
         '{{/each}}');
-      expect(stripContexts(template.dependencies(context))).to.eql(undefined);
+      expect(stripContexts(template.dependencies(context))).to.be.null;
       expect(template.get(context)).to.equal('0,33;1,77;');
     });
   });
 
   describe('HTML', function() {
-    it('gets dependencies', function() {
-      var template = createTemplate('<div>Hi<br>there</div><img src="foo">');
-      expect(template.dependencies(context)).to.equal(undefined);
-      expect(template.get(context)).to.equal('<div>Hi<br>there</div><img src="foo">');
+    it('gets empty Template dependencies', function() {
+      var template = createTemplate('');
+      expect(template.dependencies(context)).to.be.null;
+      expect(template.get(context)).to.equal('');
+    });
+
+    it('gets Doctype dependencies', function() {
+      var template = createTemplate('<!DOCTYPE html>');
+      expect(template.dependencies(context)).to.be.null;
+      expect(template.get(context)).to.equal('<!DOCTYPE html>');
+    });
+
+    it('gets Text dependencies', function() {
+      var template = createTemplate('Hi!');
+      expect(template.dependencies(context)).to.be.null;
+      expect(template.get(context)).to.equal('Hi!');
+    });
+
+    it('gets DynamicText dependencies', function() {
+      var template = createTemplate('Choose {{_page.key}}');
+      expect(template.dependencies(context)).to.eql([
+        ['_page', 'key']
+      ]);
+      expect(template.get(context)).to.equal('Choose green');
+    });
+
+    it('gets Comment dependencies', function() {
+      var template = createTemplate('<!--[Copyright 1999]-->');
+      expect(template.dependencies(context)).to.be.null;
+      expect(template.get(context)).to.equal('<!--[Copyright 1999]-->');
+    });
+
+    it.skip('gets DynamicComment dependencies from parsed template', function() {
+      // Template tag within comment is not parsed. It probably should be,
+      // since we do parse the content of other special regions, such as the
+      // text inside of scripts and styles
+      var template = createTemplate('<!--[Copyright {{_page.year}}]-->');
+      expect(template.dependencies(context)).to.eql([
+        ['_page', 'year']
+      ]);
+      expect(template.get(context)).to.equal('<!--[Copyright 2018]-->');
+    });
+
+    it('gets DynamicComment dependencies', function() {
+      var expression = createExpression('_page.year');
+      var template = new templates.DynamicComment(expression);
+      expect(template.dependencies(context)).to.eql([
+        ['_page', 'year']
+      ]);
+      expect(template.get(context)).to.equal('<!--2018-->');
+    });
+
+    it('gets Html dependencies', function() {
+      // It is not currently possible to create a template of type Html via
+      // derby-parsing, as there is no syntax that would require it
+      var template = new templates.Html('<div>Hi</div>');
+      expect(template.dependencies(context)).to.be.null;
+      expect(template.get(context)).to.equal('<div>Hi</div>');
+    });
+
+    it('gets DynamicHtml dependencies', function() {
+      var template = createTemplate('{{unescaped _page.html}}');
+      expect(template.dependencies(context)).to.eql([
+        ['_page', 'html']
+      ]);
+      expect(template.get(context)).to.equal('<div>Hi</div>');
+    });
+
+    it('gets Element dependencies', function() {
+      var template = createTemplate('<div>Hi<br>there</div>');
+      expect(template.dependencies(context)).to.be.null;
+      expect(template.get(context)).to.equal('<div>Hi<br>there</div>');
+    });
+
+    it('gets DynamicElement dependencies', function() {
+      var template = createTemplate('<tag is="{{_page.tagName}}">Hello</tag>');
+      expect(template.dependencies(context)).to.eql([
+        ['_page', 'tagName']
+      ]);
+      expect(template.get(context)).to.equal('<div>Hello</div>');
+    });
+
+    it('gets Attribute dependencies', function() {
+      var template = createTemplate('<img src="foo">');
+      expect(template.dependencies(context)).to.be.null;
+      expect(template.get(context)).to.equal('<img src="foo">');
+    });
+
+    it('gets DynamicAttribute dependencies', function() {
+      var template = createTemplate('<img src="{{_page.key}}">');
+      expect(template.dependencies(context)).to.eql([
+        ['_page', 'key']
+      ]);
+      expect(template.get(context)).to.equal('<img src="green">');
     });
   });
 });
@@ -190,7 +283,7 @@ describe('expression dependencies', function() {
   describe('literal', function() {
     it('gets literal dependencies', function() {
       var expression = createExpression('34');
-      expect(expression.dependencies(context)).to.equal(undefined);
+      expect(expression.dependencies(context)).to.be.null;
     });
   });
 
