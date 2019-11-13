@@ -4,6 +4,8 @@ var contexts = derbyTemplates.contexts;
 var templates = derbyTemplates.templates;
 var parsing = require('../lib/index');
 
+var SVG = 'http://www.w3.org/2000/svg';
+
 var model = {
   data: {
     _page: {
@@ -75,6 +77,63 @@ describe('Parse and render literal HTML', function() {
     }).to.throwException(/Missing closing HTML tag: <\/div>/);
   });
 });
+
+describe('Parse and render SVG', function() {
+  function test(name, source, expected, check) {
+    it(name, function() {
+      var template = parsing.createTemplate(source);
+      expect(check(template.content)).equal(expected);
+    });
+  }
+
+  describe('renders an SVG tag', function() {
+    test('Empty SVG', '<svg />', SVG, function(content) {
+      return content[0].ns;
+    });
+  });
+
+  describe('renders a g element', function() {
+    test('by itself (no namespace)',
+      '<g />', undefined, function(content) {
+        return content[0].ns;
+      });
+    test('inside of SVG',
+      '<svg><g /></svg>', SVG, function(content) {
+        return content[0].content[0].ns;
+      });
+    test('with explicit namespace',
+      '<g xmlns="http://www.w3.org/2000/svg" />',
+      SVG,
+      function(content) {
+        return content[0].ns;
+      });
+  });
+});
+
+
+describe('Dynamically render SVG and/or HTML', function() {
+  function test(name, source, expected, check) {
+    it(name, function() {
+      var template = parsing.createTemplate(source);
+      expect(check(template.content)).eql(expected);
+    });
+  }
+
+  test('as a result of test',
+    '{{if layout.renderer == "svg"}}' +
+      '<g xmlns="http://www.w3.org/2000/svg" />' +
+    '{{else}}' +
+      '<div />' +
+    '{{/if}}',
+    [SVG, undefined],
+    function(content) {
+      return [
+        content[0].contents[0][0].ns,
+        content[0].contents[1][0].ns,
+      ];
+    });
+});
+
 
 describe('Parse and render dynamic text and blocks', function() {
 
